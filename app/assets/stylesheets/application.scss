@@ -1,0 +1,92 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require basscss
+ */
+
+ .flex-1 { flex-grow: 1 }
+
+ * {
+   box-sizing: border-box;
+ }
+
+ html, body {
+   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Helvetica,sans-serif;
+   font-size: 16px;
+   height: 100%;
+   line-height: 1.5;
+   margin: 0;
+   padding: 0;
+ }
+
+ h1, h2, h3, h4, h5, h6 {
+   font-weight: 200;
+ }
+
+ .content {
+   height: 100vh;
+ }
+
+ .main {
+   background-color: #F1F1F1;
+   &-weekdays {
+     overflow-x: scroll;
+   }
+   &-meals {
+     border-left: 5px solid white;
+     min-width: 22rem;
+     padding: 1rem;
+   }
+ }
+
+ .meal {
+   background-color: white;
+   border-radius: 3px;
+ }
+ .meal-list {
+   &-meal {
+     align-items: center;
+     background-color: white;
+     border-radius: 3px;
+     display: flex;
+     height: 4rem;
+     margin-bottom: 1rem;
+     padding: 0.5rem;
+   }
+ }
+
+ .weekday {
+   min-width: 22rem;;
+   &:hover {
+   }
+   &-content {
+     background-color: white;
+     height: 100%;
+     overflow: auto;
+     &-dragging-over {
+       .weekday-droppable-area { display: block }
+       * {
+        pointer-events: none;
+      }
+     }
+   }
+   &-droppable-area {
+     display: none;
+     height: 6rem;
+     background-color: #eee;
+     margin: 1rem;
+     border-radius: 3px;
+     &--active {
+       display: block;
+     }
+   }
+ }

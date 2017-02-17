@@ -1,0 +1,26 @@
+.content.flex.flex-column
+  %section.nav
+    %nav
+      %h3= mealbook.name
+
+  %section#mealbook.main.flex.flex-auto
+    .flex.flex-column.flex-auto
+      %section{ data: { turbolinks: "false" } }
+        = link_to "Previous", "#prev", "@click": "renderPrevWeek"
+        %h2.inline-block {{ mealbook.current_date_short }}
+        = link_to "Next", "#next", "@click": "renderNextWeek"
+
+      %section.main-weekdays.flex.flex-auto.items-strech
+        .pb2.flex.flex-1
+          = render 'weekday_meal'
+
+    %section.main-meals
+      %h4 Meals
+      #mealbookMeals.meal-list
+        - mealbook.meals.each do |meal|
+          %meal-list-meal
+
+
+:javascript
+  const currentMealbook = #{ raw mealbook.to_json };
+  const weekdays = #{ raw mealbook.weekdays.map(&:to_json) }.map(item => JSON.parse(item));
