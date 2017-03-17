@@ -13,11 +13,24 @@
 //= require turbolinks
 //= require axios
 //= require vue
+//= require meal
 //= require mealAssignment
 
 // NO //= require jquery //= require jquery_ujs
 function getCSRFToken() {
   return document.querySelector("meta[name='csrf-token']").content
+}
+
+function parseMarkdown(markdownText) {
+  const config = {
+    headers: {
+      "Accept": "application/vnd.github.v3+json",
+    }
+  }
+  markdownParser = axios.create(config)
+  return markdownParser.post("https://api.github.com/markdown", {
+    text: markdownText
+  })
 }
 
 document.addEventListener("turbolinks:load", function() {

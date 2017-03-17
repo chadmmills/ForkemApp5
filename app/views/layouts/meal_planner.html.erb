@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <%= render "layouts/head" %>
+  <body>
+    <div class="content flex flex-column">
+      <%= render "layouts/meal_planner_nav", mealbook: Mealbook.first %>
+      <main class="main flex flex-auto">
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>

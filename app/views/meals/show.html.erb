@@ -1,0 +1,23 @@
+<div id="showMeal" class="flex-auto">
+  <h1 class="center p2"><%= meal.name %></h1>
+  <%= link_to "Edit", edit_meal_path(meal), class: "center" %>
+  <div class="flex">
+    <div class="flex-50 py2 px1">
+      <div class="p1 bg-white">
+        <%= raw meal.desc %>
+      </div>
+    </div>
+    <div class="flex-50 py2 px1">
+      <div class="p1 bg-white">
+        <h4>Ingredients</h4>
+        <% meal.ingredients.each do |ingr| %>
+          <div>
+            <span><%= ingr.quantity %></span>
+            <span><%= ingr.measurement_unit %></span>
+            <span><%= ingr.name %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
