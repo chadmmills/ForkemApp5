@@ -1,0 +1,14 @@
+<div id="clearance" class="sign-up content flex-center main">
+  <div class="bg-white flex-50 p3 rounded">
+    <h1 class="center"><%= t("app_name") %></h1>
+    <h4 class="center"><%= t(".title") %></h4>
+    <%= form_for @user, html: { class: "pt2" } do |form| %>
+      <%= render partial: '/users/form', object: form %>
+
+      <div class="flex">
+        <div class="flex-1"><%= form.submit t(".button") %></div>
+        <%= link_to t(".sign_in"), sign_in_path %>
+      </div>
+    <% end %>
+  </div>
+</div>

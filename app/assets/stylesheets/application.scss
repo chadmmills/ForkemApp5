@@ -2,223 +2,241 @@
  *= require basscss
  */
 
- $black: #29302e;
- $grey: #F1F1F1;
- $white: #fff;
- $green: #76cda4;
+$black: #29302e;
+$grey: #F1F1F1;
+$white: #fff;
+$green: #76cda4;
  // http://www.color-hex.com/color/76cda4
 
 /******************************************************************************
   UTILITIES
 ******************************************************************************/
 
- .bg-grey { background-color: $grey; }
- .bg-white { background-color: $white; }
- .bg-green { background-color: $green; }
- .box1 { height: 1rem; width: 1rem; }
- .box2 { height: 2rem; width: 2rem; }
- .c-white { color: $white; }
- .circle { border-radius: 50%; }
- .cursor:hover { cursor: pointer; }
- .flex-1 { flex-grow: 1 }
- .flex-5 { flex-basis: 5%; }
- .flex-15 { flex-basis: 15%; }
- .flex-50 { flex-basis: 50%; }
- .flex-center { display: flex; align-items: center; justify-content: center; }
- .ht1 { height: 1rem }
- .ht2 { height: 2rem }
- .ht3 { height: 3rem }
- .ht4 { height: 4rem }
- .ht5 { height: 5rem }
- .ht6 { height: 6rem }
- .normal { text-decoration: none; }
- .relative { position: relative; }
- .rounded { border-radius: 4px; }
- .top-right { position: absolute; top: 0; right: 0; }
- .w1 { width: 1rem }
- .w2 { width: 2rem }
- .w3 { width: 3rem }
- .w4 { width: 4rem }
+.bg-grey { background-color: $grey; }
+.bg-white { background-color: $white; }
+.bg-green { background-color: $green; }
+.box1 { height: 1rem; width: 1rem; }
+.box2 { height: 2rem; width: 2rem; }
+.c-white { color: $white; }
+.circle { border-radius: 50%; }
+.cursor:hover { cursor: pointer; }
+.flex-1 { flex-grow: 1 }
+.flex-5 { flex-basis: 5%; }
+.flex-15 { flex-basis: 15%; }
+.flex-20 { flex-basis: 20%; }
+.flex-50 { flex-basis: 50%; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.fill-space { height: 100%; width: 100%; }
+.ht1 { height: 1rem }
+.ht2 { height: 2rem }
+.ht3 { height: 3rem }
+.ht4 { height: 4rem }
+.ht5 { height: 5rem }
+.ht6 { height: 6rem }
+.normal { text-decoration: none; }
+.relative { position: relative; }
+.rounded { border-radius: 4px; }
+.top-right { position: absolute; top: 0; right: 0; }
+.w1 { width: 1rem }
+.w2 { width: 2rem }
+.w3 { width: 3rem }
+.w4 { width: 4rem }
 
 /******************************************************************************
   ELEMENTS
 ******************************************************************************/
- * {
-   box-sizing: border-box;
- }
+* {
+  box-sizing: border-box;
+}
 
- html, body {
-   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Helvetica,sans-serif;
-   font-size: 16px;
-   height: 100%;
-   line-height: 1.5;
-   margin: 0;
-   padding: 0;
-   color: $black;
- }
+html, body {
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Helvetica,sans-serif;
+  font-size: 16px;
+  height: 100%;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  color: $black;
+}
 
- h1, h2, h3, h4, h5, h6 {
-   margin:0;
-   padding: 0;
-   font-weight: 200;
- }
+h1 { font-size: 3rem; }
+h1, h2, h3, h4, h5, h6 {
+  margin:0;
+  padding: 0;
+  font-weight: 200;
+}
 
- label {
-   font-size: 0.9365rem;
- }
+label {
+  font-size: 0.9365rem;
+}
 
- .select {
-   position: relative;
-   select {
-     cursor: pointer;
-     padding: 10px 15px;
-     outline: 0;
-     border: 1px solid #eee;
-     border-radius: 0;
-     background-color: #fbfbfb;
-     appearance: none;
-     -webkit-appearance: none;
-     width: 100%;
-   }
-   &:after {
-     content: "";
-     position: absolute;
-     top: 0.875rem;
-     right: 0.5rem;
-     width: 0;
-     height: 0;
-     pointer-events: none;
-     border-style: solid;
-     border-width: 8px 5px 0 5px;
-     border-color: #7b7b7b transparent transparent transparent;
-   }
- }
+.select {
+  position: relative;
+  select {
+    cursor: pointer;
+    padding: 10px 15px;
+    outline: 0;
+    border: 1px solid #eee;
+    border-radius: 0;
+    background-color: #fbfbfb;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0.875rem;
+    right: 0.5rem;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    border-style: solid;
+    border-width: 8px 5px 0 5px;
+    border-color: #7b7b7b transparent transparent transparent;
+  }
+}
 
- .input, .textarea {
-   padding: 0.75rem 0.5rem;
-   font-size: 0.875rem;
-   width: 100%;
-   border-style: initial;
-   border: 1px solid #d1d1d1;
-   -webkit-appearance: none;
-   &:focus {
-     outline: none;
-   }
-   &.inline {
-     border: none;
-     border-bottom: 1px solid #d1d1d1;
-     &:focus {
-       border-bottom: 2px solid $green;
-     }
-   }
- }
+.input, .textarea {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.875rem;
+  width: 100%;
+  border-style: initial;
+  border: 1px solid #d1d1d1;
+  -webkit-appearance: none;
+  &:focus {
+    outline: none;
+  }
+  &.inline {
+    border: none;
+    border-bottom: 1px solid #d1d1d1;
+    &:focus {
+      border-bottom: 2px solid $green;
+    }
+  }
+}
 
- .textarea {
-   min-height: 6rem;
- }
+.textarea {
+  min-height: 6rem;
+}
 
- .dot {
-   height: 0.5rem;
-   width: 0.5rem;
- }
+.dot {
+  height: 0.5rem;
+  width: 0.5rem;
+}
 
- .content {
-   height: 100vh;
- }
+.content {
+  height: 100vh;
+}
 
- .main {
-   background-color: $grey;
-   &-weekdays {
-     overflow-x: scroll;
-   }
-   &-meals {
-     position: relative;
-     border-left: 5px solid white;
-     min-width: 22rem;
-     padding: 1rem;
-     transition: all 0.3s ease-out;
-     &__hidden {
-       min-width: 0px;
-       .meal-list {
-         display: none;
-       }
-     }
-     &__toggle {
-       color: lightgrey;
-       font-size: 1.5rem;
-       font-weight: bold;
-       height: 35px;
-       line-height: 35px;
-       position: absolute;
-       right: 0;
-       text-align: center;
-       top: 0;
-       width: 35px;
-       &:hover {
-         cursor: pointer;
-       }
-     }
-   }
- }
+.main {
+  background-color: $grey;
 
- .meal {
-   background-color: white;
-   border-radius: 3px;
- }
- .meal-list {
-   &-meal {
-     align-items: center;
-     background-color: white;
-     border-radius: 3px;
-     display: flex;
-     height: 4rem;
-     margin-bottom: 1rem;
-     padding: 0.5rem;
-   }
- }
+  &-weekdays {
+    overflow-x: scroll;
+  }
 
- .weekday {
-   min-width: 16rem;;
-   width: 100%;
-   &-content {
-     background-color: white;
-     height: 100%;
-     overflow: auto;
-     padding: 0.5rem;
-     &-dragging-over {
-        pointer-events: none;
-       .weekday-droppable-area { display: block }
-       * {
+  &-meals {
+    position: relative;
+    border-left: 5px solid white;
+    min-width: 22rem;
+    padding: 1rem;
+    transition: all 0.3s ease-out;
+
+    &__hidden {
+      min-width: 0px;
+
+      .meal-list {
+        display: none;
+      }
+    }
+
+    &__toggle {
+      color: lightgrey;
+      font-size: 1.5rem;
+      font-weight: bold;
+      height: 35px;
+      line-height: 35px;
+      position: absolute;
+      right: 0;
+      text-align: center;
+      top: 0;
+      width: 35px;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.meal {
+  background-color: white;
+  border-radius: 3px;
+}
+
+.meal-list {
+
+  &-meal {
+    align-items: center;
+    background-color: white;
+    border-radius: 3px;
+    display: flex;
+    height: 4rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+  }
+}
+
+.weekday {
+  min-width: 16rem;;
+  width: 100%;
+
+  &-content {
+    background-color: white;
+    height: 100%;
+    overflow: auto;
+    padding: 0.5rem;
+
+    &-dragging-over {
+      pointer-events: none;
+
+      .weekday-droppable-area { display: block }
+      * {
         pointer-events: none;
       }
-     }
-   }
-   &-droppable-area {
-     display: none;
-     height: 6rem;
-     background-color: #eee;
-     margin: 1rem;
-     border-radius: 3px;
-     &--active {
-       display: block;
-     }
-   }
-   &-meal {
-     background-color: $grey;
-     border-radius: 3px;
-   }
- }
+    }
+  }
 
- .tab {
-   padding: 0.5rem;
-   &--active {
-     background-color: $grey;
-   }
- }
+  &-droppable-area {
+    display: none;
+    height: 6rem;
+    background-color: #eee;
+    margin: 1rem;
+    border-radius: 3px;
 
- .tab-panel {
-   display: none;
-   &--visible {
-     display: flex;
-   }
- }
+    &--active {
+      display: block;
+    }
+  }
+
+  &-meal {
+    background-color: $grey;
+    border-radius: 3px;
+  }
+}
+
+.tab {
+  padding: 0.5rem;
+
+  &--active {
+    background-color: $grey;
+  }
+}
+
+.tab-panel {
+  display: none;
+
+  &--visible {
+    display: flex;
+  }
+}
