@@ -2,6 +2,7 @@
 <html>
   <%= render "layouts/head" %>
   <body>
+    <%= render "layouts/flash" %>
     <div class="content flex flex-column">
       <%= render "layouts/meal_planner_nav", mealbook: Mealbook.first %>
       <main class="main flex flex-auto">

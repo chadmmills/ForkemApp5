@@ -1,5 +1,9 @@
 class MealbooksController < ApplicationController
-  layout "meal_planner"
+  layout "meal_planner", except: :index
+
+  def index
+
+  end
 
   def show
     respond_to do |format|
