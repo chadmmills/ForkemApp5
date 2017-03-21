@@ -8,5 +8,10 @@ feature "A User" do
     click_button "Create Account"
 
     expect(page).to have_css "h1", text: "Mealbooks"
+
+    fill_in "Mealbook Name", with: "Some Family"
+    click_button "Create Mealbook"
+
+    expect(page).to have_css "nav section a"
   end
 end

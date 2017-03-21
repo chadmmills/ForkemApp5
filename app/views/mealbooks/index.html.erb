@@ -1,1 +1,19 @@
-<h1>Mealbooks</h1>
+<div class="content main">
+  <h1>Mealbooks</h1>
+  <div class="flex">
+    <%= form_for Mealbook.new do |f| %>
+      <div class="bg-white flex-20 p3 rounded">
+        <h3>New Mealbook</h3>
+        <div>
+          <%= f.label :name, "Mealbook Name" %>
+          <%= f.text_field :name, class: "input inline" %>
+        </div>
+        <div>
+          <%= f.submit "Create Mealbook" %>
+        </div>
+      </div>
+    <% end %>
+    <% mealbooks.each do |mealbook| %>
+    <% end %>
+  </div>
+</div>
