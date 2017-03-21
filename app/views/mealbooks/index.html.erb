@@ -14,6 +14,9 @@
       </div>
     <% end %>
     <% mealbooks.each do |mealbook| %>
+      <div class="bg-white flex-20 p3 rounded">
+        <h3><%= link_to mealbook.name, mealbook %></h3>
+      </div>
     <% end %>
   </div>
 </div>

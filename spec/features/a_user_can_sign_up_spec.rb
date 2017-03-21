@@ -12,6 +12,6 @@ feature "A User" do
     fill_in "Mealbook Name", with: "Some Family"
     click_button "Create Mealbook"
 
-    expect(page).to have_css "nav section a"
+    expect(page).to have_css "h3 a", text: "Some Family"
   end
 end

@@ -1,8 +1,9 @@
 class MealbooksController < ApplicationController
+  before_action :require_login
   layout "meal_planner", except: %i(index create)
 
   def index
-    render locals: { mealbooks: [] }
+    render locals: { mealbooks: current_user.mealbooks }
   end
 
   def show
@@ -35,7 +36,7 @@ class MealbooksController < ApplicationController
   end
 
   def mealbook
-    MealbookPlanner.new(mealbook: Mealbook.first, current_date: weekday)
+    MealbookPlanner.new(mealbook: Mealbook.find(params[:id]), current_date: weekday)
   end
 
   def mealbook_params
