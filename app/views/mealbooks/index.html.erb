@@ -13,10 +13,6 @@
         </div>
       </div>
     <% end %>
-    <% mealbooks.each do |mealbook| %>
-      <div class="bg-white flex-20 p3 rounded">
-        <h3><%= link_to mealbook.name, mealbook %></h3>
-      </div>
-    <% end %>
+    <%= render partial: "mealbook_list_item", collection: mealbooks, as: :mealbook %>
   </div>
 </div>

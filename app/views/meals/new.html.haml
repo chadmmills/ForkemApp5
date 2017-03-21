@@ -4,4 +4,4 @@
 
 :javascript
   window._currentMealbook = #{mealbook.to_json};
-  window._currentMeal = { desc: null, name: null, ingredients: [] };
+  window._currentMeal = { mealbook_id: _currentMealbook.id, desc: null, name: null, ingredients: [] };

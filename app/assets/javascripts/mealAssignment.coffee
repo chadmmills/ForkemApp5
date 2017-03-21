@@ -128,7 +128,7 @@ document.addEventListener "turbolinks:load", ->
           Axios.delete "meal-assignments/#{assignment_id}"
             .then (response) => @mealbook = response.data.mealbook
         renderWeek: (dateParam) ->
-          Axios.get "/", params: { weekdate: dateParam }
+          Axios.get "/mealbooks/#{@mealbook.id}", params: { weekdate: dateParam }
             .then (response) =>
               @mealbook = response.data.mealbook
     )
