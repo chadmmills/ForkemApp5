@@ -43,3 +43,8 @@ document.addEventListener("turbolinks:load", function() {
   }
   window.Axios = window.Axios || axios.create(config)
 });
+
+document.addEventListener("turbolinks:before-render", function() {
+  window._currentMealbook = null;
+  window._currentMeal = null;
+});

@@ -120,10 +120,33 @@ label {
   min-height: 6rem;
 }
 
+/******************************************************************************
+  COMPONENTS
+******************************************************************************/
 .dot {
   height: 0.5rem;
   width: 0.5rem;
 }
+
+%card {
+  border-radius: 4px;
+  padding: 1rem;
+}
+.card {
+
+  &-s {
+    @extend %card;
+    height: 8rem;
+    width: 16rem;
+  }
+
+  &-m {
+    @extend %card;
+    height: 12rem;
+    width: 20rem;
+  }
+}
+/******************************************************************************/
 
 .content {
   height: 100vh;

@@ -4,7 +4,10 @@
   <body>
     <%= render "layouts/flash" %>
     <div class="content flex flex-column">
-      <%= render "layouts/meal_planner_nav", mealbook: mealbook%>
+      <%= render(
+        "layouts/meal_planner_nav",
+        planner_nav: PlannerNav.for(controller_action, mealbook)
+      ) %>
       <main class="main flex flex-auto">
         <%= yield %>
       </main>
