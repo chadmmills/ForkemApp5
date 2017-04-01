@@ -1,6 +1,5 @@
 = form_for meal do |f|
   .flex.pt2.px3
-    - #.flex-50.py2.pl3.pr2
     = render "/shared/box" do
       %h2 Meal
       .mb2
@@ -26,13 +25,13 @@
 
     = render "/shared/box" do
       %h2 Ingredients
-      .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients"}
-        %input{ "v-model": "ingredient.quantity", class: "input inline flex-15" }
+      .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients" }
+        %input.input.inline.flex-15{ "v-model": "ingredient.quantity" }
         .select.flex-15
           = select_tag :measurement_unit,
             options_for_select( ["TSP", "TSB", "Oz"]),
             "v-model": "ingredient.measurement_unit"
         %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
-        %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)"}
+        %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)" }
           &times
       = f.button "Add", "v-on:click.prevent": "addIngredient"
