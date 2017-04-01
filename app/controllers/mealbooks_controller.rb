@@ -44,7 +44,7 @@ class MealbooksController < ApplicationController
   end
 
   def weekday
-    @_weekday ||= Date.parse(params[:weekdate]) rescue Date.today
+    @_weekday ||= Date.parse(params[:weekdate]) rescue Date.today.beginning_of_week
   end
 
   def weekdays

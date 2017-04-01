@@ -1,37 +1,38 @@
 = form_for meal do |f|
-  .flex
-    .meal-fields.flex-50.py2.px1
-      .p1.bg-white
-        %h2 Meal Attrs
-        .mb2
-          = f.label :name, class: "block"
-          = f.text_field :name, class: "input inline", value: nil, "v-model": "meal.name"
-        .mb1
-          = f.label :desc, class: "block"
-          .flex
-            .tab{ "v-bind:class": "{ 'tab--active': activeTab === 'write' }",
-                  "v-on:click": "activeTab = 'write'" }
-              Write
-            .tab{ "v-bind:class": "{ 'tab--active': activeTab === 'preview' }",
-                  "v-on:click": "previewDescription" }
-              Preview
-          .tab-panel{ "v-bind:class": "{ 'tab-panel--visible': activeTab === 'write' }" }
-            = f.text_area :desc, class: "textarea", value: nil, "v-model": "meal.desc"
-          .tab-panel{ "v-bind:class": "{ 'tab-panel--visible': activeTab === 'preview' }" }
-            %div{ "v-html": "generatedHTML" }
-        .field
-          = f.button "Save", "v-on:click.prevent": "saveMeal"
+  .flex.pt2.px3
+    - #.flex-50.py2.pl3.pr2
+    = render "/shared/box" do
+      %h2 Meal
+      .mb2
+        = f.label :name, class: "block"
+        = f.text_field :name, class: "input inline", value: nil, "v-model": "meal.name"
+      .mb1
+        = f.label :desc, class: "block"
+        .flex
+          .tab{ "v-bind:class": "{ 'tab--active': activeTab === 'write' }",
+                "v-on:click": "activeTab = 'write'" }
+            Write
+          .tab{ "v-bind:class": "{ 'tab--active': activeTab === 'preview' }",
+                "v-on:click": "previewDescription" }
+            Preview
+        .tab-panel{ "v-bind:class": "{ 'tab-panel--visible': activeTab === 'write' }" }
+          = f.text_area :desc, class: "textarea", value: nil, "v-model": "meal.desc"
+        .tab-panel{ "v-bind:class": "{ 'tab-panel--visible': activeTab === 'preview' }" }
+          %div{ "v-html": "generatedHTML" }
+      .field
+        = f.button "Save", "v-on:click.prevent": "saveMeal"
 
-    .meal-ingredients.flex-50.py2.px1
-      .p1.bg-white
-        %h2 Ingredients
-        .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients"}
-          %input{ "v-model": "ingredient.quantity", class: "input inline flex-15" }
-          .select.flex-15
-            = select_tag :measurement_unit,
-              options_for_select( ["TSP", "TSB", "Oz"]),
-              "v-model": "ingredient.measurement_unit"
-          %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
-          %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)"}
-            &times
-        = f.button "Add", "v-on:click.prevent": "addIngredient"
+    .p2
+
+    = render "/shared/box" do
+      %h2 Ingredients
+      .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients"}
+        %input{ "v-model": "ingredient.quantity", class: "input inline flex-15" }
+        .select.flex-15
+          = select_tag :measurement_unit,
+            options_for_select( ["TSP", "TSB", "Oz"]),
+            "v-model": "ingredient.measurement_unit"
+        %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
+        %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)"}
+          &times
+      = f.button "Add", "v-on:click.prevent": "addIngredient"

@@ -9,7 +9,7 @@ class MealAssignmentsController < ApplicationController
       params: params,
       mealbook: MealbookPlanner.new(
         mealbook: Meal.find(params[:meal_id]).mealbook,
-        current_date: Date.parse(params[:weekdate])
+        current_date: Date.parse(params[:weekdate]).beginning_of_week
       )
     }
   end
@@ -21,9 +21,8 @@ class MealAssignmentsController < ApplicationController
       params: params,
       mealbook: MealbookPlanner.new(
         mealbook: assignment.meal.mealbook,
-        current_date: assignment.assigned_on,
+        current_date: assignment.assigned_on.beginning_of_week,
       )
     }
-
   end
 end

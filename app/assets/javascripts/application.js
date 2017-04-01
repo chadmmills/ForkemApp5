@@ -11,6 +11,7 @@
 // about supported directives.
 //
 //= require turbolinks
+//= require touch_dnd_shim
 //= require axios
 //= require vue
 //= require meal
