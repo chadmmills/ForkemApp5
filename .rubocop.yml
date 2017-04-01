@@ -750,7 +750,7 @@ Style/SignalException:
 Style/SingleLineMethods:
   Description: 'Avoid single-line methods.'
   StyleGuide: '#no-single-line-methods'
-  Enabled: true
+  Enabled: false
 
 Style/SpaceBeforeFirstArg:
   Description: >-
