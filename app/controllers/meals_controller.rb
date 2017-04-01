@@ -2,11 +2,16 @@ class MealsController < ApplicationController
   layout "meal_planner"
 
   def show
-    render locals: { meal: MealPresenter.new(meal: Meal.find(params[:id])) }
+    meal = Meal.find(params[:id])
+
+    render locals: {
+      meal: MealPresenter.new(meal: meal),
+      mealbook: meal.mealbook
+    }
   end
 
   def new
-    render locals: { mealbook: Mealbook.first }
+    render locals: { mealbook: Mealbook.find(params[:mealbook_id]) }
   end
 
   def create
@@ -23,9 +28,11 @@ class MealsController < ApplicationController
   end
 
   def edit
+    meal = Meal.find(params[:id])
+
     render locals: {
-      meal: Meal.find(params[:id]),
-      mealbook: Mealbook.first,
+      meal: meal,
+      mealbook: meal.mealbook,
     }
   end
 
@@ -53,7 +60,7 @@ class MealsController < ApplicationController
     end
 
     def desc
-      parser.render(super)
+      parser.render(super || "")
     end
 
   end

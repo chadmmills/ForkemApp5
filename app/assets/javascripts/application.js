@@ -11,6 +11,7 @@
 // about supported directives.
 //
 //= require turbolinks
+//= require touch_dnd_shim
 //= require axios
 //= require vue
 //= require meal
@@ -42,4 +43,9 @@ document.addEventListener("turbolinks:load", function() {
     }
   }
   window.Axios = window.Axios || axios.create(config)
+});
+
+document.addEventListener("turbolinks:before-render", function() {
+  window._currentMealbook = null;
+  window._currentMeal = null;
 });

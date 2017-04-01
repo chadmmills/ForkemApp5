@@ -8,23 +8,21 @@ class MealAssignmentsController < ApplicationController
     render json: {
       params: params,
       mealbook: MealbookPlanner.new(
-        mealbook: Mealbook.first,
-        current_date: Date.parse(params[:weekdate])
+        mealbook: Meal.find(params[:meal_id]).mealbook,
+        current_date: Date.parse(params[:weekdate]).beginning_of_week
       )
     }
   end
 
   def destroy
-    mealbook = Mealbook.first
-    assignment = mealbook.meal_assignments.find(params[:id])
+    assignment = MealAssignment.find(params[:id])
     assignment.destroy!
     render json: {
       params: params,
       mealbook: MealbookPlanner.new(
-        mealbook: Mealbook.first,
-        current_date: assignment.assigned_on,
+        mealbook: assignment.meal.mealbook,
+        current_date: assignment.assigned_on.beginning_of_week,
       )
     }
-
   end
 end
