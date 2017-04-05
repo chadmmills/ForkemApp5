@@ -4,5 +4,6 @@
 
 <script type="text/javascript">
   window._currentMealbook = <%= raw mealbook.to_json %>;
-  window._currentMeal = <%= raw meal.to_json(include: :ingredients) %>;
+  window._currentMealRaw = <%= raw MealForm.for(meal).to_json %>;
+  window._currentMeal = <%= raw MealForm.for(meal).to_json %>;
 </script>

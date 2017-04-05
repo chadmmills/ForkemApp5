@@ -35,4 +35,42 @@ RSpec.describe "Meals" do
       end.to change(Ingredient, :count).by 2
     end
   end
+
+  describe 'updating a meal' do
+    it "should update a meal without ingredients" do
+      mealbook_id = create(:mealbook).id
+      meal = create(:meal, mealbook_id: mealbook_id)
+      params = {
+        "meal"=>{
+          "name"=>"Updated Name",
+          "desc"=>"### Test",
+          "mealbook_id" => mealbook_id
+        },
+      }
+
+      patch "/meals/#{meal.id}", params: params
+      meal.reload
+      expect(meal.name).to eq('Updated Name')
+    end
+
+    it "should update a meal with ingredients" do
+      mealbook_id = create(:mealbook).id
+      meal = create(:meal, mealbook_id: mealbook_id)
+      ingredient = create(:ingredient, meal: meal)
+      params = {
+        "meal"=>{
+          "name"=>"Updated Name",
+          "desc"=>"### Test",
+          "ingredients"=>[
+            { id: ingredient.id, name: "New Name", _delete: false },
+          ],
+          "mealbook_id" => mealbook_id
+        },
+      }
+
+      patch "/meals/#{meal.id}", params: params
+      ingredient.reload
+      expect(ingredient.name).to eq('New Name')
+    end
+  end
 end

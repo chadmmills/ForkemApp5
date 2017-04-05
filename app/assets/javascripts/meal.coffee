@@ -23,7 +23,11 @@ document.addEventListener "turbolinks:load", ->
         saveMeal: () ->
           console.log @meal
           console.log JSON.parse(JSON.stringify(@meal))
-          Axios.post("/meals", { meal: JSON.parse(JSON.stringify(@meal))})
+          Axios(
+            method: @meal.httpMethod,
+            url: @meal.url,
+            data: { meal: JSON.parse(JSON.stringify(@meal))}
+          )
             .then (resp) -> Turbolinks.visit("/")
 
 
