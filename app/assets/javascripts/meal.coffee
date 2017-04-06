@@ -28,7 +28,5 @@ document.addEventListener "turbolinks:load", ->
             url: @meal.url,
             data: { meal: JSON.parse(JSON.stringify(@meal))}
           )
-            .then (resp) -> Turbolinks.visit("/")
-
-
+            .then (resp) => Turbolinks.visit(@meal.success_url)
     )

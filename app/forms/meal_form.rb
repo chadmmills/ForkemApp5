@@ -5,6 +5,7 @@ module MealForm # :nodoc:
         name: name,
         desc: desc,
         url: form_url,
+        success_url: response_success_path,
         httpMethod: http_method,
         ingredients: ingredients.map(&:as_json),
       }.to_json
@@ -12,6 +13,7 @@ module MealForm # :nodoc:
 
     def form_url; ""; end
     def http_method; ""; end
+    def response_success_path; "/mealbooks/#{mealbook_id}"; end
   end
 
   class UpdateForm < Base
