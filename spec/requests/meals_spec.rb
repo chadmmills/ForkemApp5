@@ -5,11 +5,11 @@ RSpec.describe "Meals" do
     it "should save the meal with valid params" do
       mealbook_id = create(:mealbook).id
       params = {
-        "meal"=>{
-          "desc"=>"### Test",
-          "ingredients"=>[],
-          "name"=>"Test",
-          "mealbook_id" => mealbook_id
+        'meal' => {
+          'name' => 'Updated Name',
+          'desc' => '### Test',
+          'mealbook_id' => mealbook_id,
+          'ingredients' => [],
         },
       }
       expect do
@@ -20,18 +20,18 @@ RSpec.describe "Meals" do
     it "should save the meal and ingredientswith valid params" do
       mealbook_id = create(:mealbook).id
       params = {
-        "meal"=>{
-          "desc"=>"### Test",
-          "ingredients"=>[
-            { name: "Salt", measurement_unit: "TSP", quantity: "0.5", _delete: false },
-            { name: "Pepper", measurement_unit: "TSP", quantity: "1", _delete: false },
+        'meal' => {
+          'name' => 'Updated Name',
+          'desc' => '### Test',
+          'mealbook_id' => mealbook_id,
+          'ingredients' => [
+            { name: 'Salt', measurement_unit: 'TSP', quantity: '0.5', _delete: false },
+            { name: 'Pepper', measurement_unit: 'TSP', quantity: '1', _delete: false },
           ],
-          "name"=>"Test",
-          "mealbook_id" => mealbook_id
         },
       }
       expect do
-        post "/meals", params: params
+        post '/meals', params: params
       end.to change(Ingredient, :count).by 2
     end
   end
@@ -41,10 +41,10 @@ RSpec.describe "Meals" do
       mealbook_id = create(:mealbook).id
       meal = create(:meal, mealbook_id: mealbook_id)
       params = {
-        "meal"=>{
-          "name"=>"Updated Name",
-          "desc"=>"### Test",
-          "mealbook_id" => mealbook_id
+        'meal' => {
+          'name' => 'Updated Name',
+          'desc' => '### Test',
+          'mealbook_id' => mealbook_id
         },
       }
 
@@ -58,18 +58,19 @@ RSpec.describe "Meals" do
       meal = create(:meal, mealbook_id: mealbook_id)
       ingredient = create(:ingredient, meal: meal)
       params = {
-        "meal"=>{
-          "name"=>"Updated Name",
-          "desc"=>"### Test",
-          "ingredients"=>[
-            { id: ingredient.id, name: "New Name", _delete: false },
+        'meal' => {
+          'name' => 'Updated Name',
+          'desc' => '### Test',
+          'ingredients' => [
+            { id: ingredient.id, name: 'New Name', _delete: false },
           ],
-          "mealbook_id" => mealbook_id
+          'mealbook_id' => mealbook_id
         },
       }
 
       patch "/meals/#{meal.id}", params: params
       ingredient.reload
+
       expect(ingredient.name).to eq('New Name')
     end
   end
