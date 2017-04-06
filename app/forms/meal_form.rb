@@ -1,4 +1,4 @@
-module MealForm
+module MealForm # :nodoc:
   class Base < SimpleDelegator
     def to_json
       {
@@ -20,21 +20,21 @@ module MealForm
     end
 
     def http_method
-      "put"
+      'put'
     end
   end
 
   class NewForm < Base
     def form_url
-      "/meals"
+      '/meals'
     end
 
     def http_method
-      "post"
+      'post'
     end
   end
-  
+
   def self.for(meal)
-    (meal.persisted? ? UpdateForm : NewForm ).new(meal)
+    (meal.persisted? ? UpdateForm : NewForm).new(meal)
   end
 end
