@@ -125,7 +125,7 @@ document.addEventListener "turbolinks:load", ->
               <weekday-meals :weekdays="weekdays" :removeAssignment="destroyAssignment" :mealAssigned="updateWeek"></weekday-meals>
             </section>
           </div>
-          <section class='main-meals' v-bind:class="{ 'main-meals__hidden': !showMealDrawer }">
+          <section class='main-meals scroll-y' v-bind:class="{ 'main-meals__hidden': !showMealDrawer }">
             <div @click="showMealDrawer = !showMealDrawer" class="main-meals__toggle">&times</div>
             <div class='meal-list' id='mealbookMeals'>
               <h4 class="mt0 mb1">Meals</h4>

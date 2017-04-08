@@ -2,7 +2,4 @@
   <%= render "form", meal: meal %>
 </div>
 
-<script type="text/javascript">
-  window._currentMealbook = <%= raw mealbook.to_json %>;
-  window._currentMeal = <%= raw meal.to_json(include: :ingredients) %>;
-</script>
+<%= render 'javascript_variables', mealbook: mealbook, meal: MealForm.for(meal) %>
