@@ -4,6 +4,7 @@ module MealForm # :nodoc:
       {
         name: name,
         desc: desc,
+        mealbook_id: mealbook_id,
         url: form_url,
         success_url: response_success_path,
         httpMethod: http_method,

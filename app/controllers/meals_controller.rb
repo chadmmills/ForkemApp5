@@ -73,6 +73,7 @@ class MealsController < ApplicationController
           :measurement_unit,
           :quantity,
           :id,
+          :_delete,
         ]
     ).fetch(:ingredients, [])
   end
@@ -105,6 +106,28 @@ class MealsController < ApplicationController
     end
   end
 
+  class SaveableIngredient
+    attr_reader :ingredient
+    def initialize(ingredient)
+      @ingredient = ingredient
+    end
+    delegate :valid?, to: :ingredient
+
+    def save!
+      ingredient.save!
+    end
+  end
+
+  class DeleteableIngredient < SaveableIngredient
+    def initialize(ingredient)
+      @ingredient = ingredient
+    end
+
+    def save!
+      ingredient.destroy!
+    end
+  end
+
   class IngredientConsolidator
     attr_reader :meal, :form_params, :existing_ingredients
     def initialize(meal, form_params, existing_ingredients)
@@ -115,12 +138,21 @@ class MealsController < ApplicationController
     def merged_ingredients
       form_params.map do |ing|
         (existing_ingredients.find { |e| e.id == ing[:id]} ||
-          Ingredient.new(ing.merge(meal: meal))).tap do |ingredient|
+          Ingredient.new(ing.merge(meal: meal))).as do |ingredient|
           ingredient.update_attributes(ing)
-          ingredient
+          ingredient_action_type_for(ingredient)
         end
       end
     end
+
+    def ingredient_action_type_for(ingredient)
+      if ingredient._delete
+        DeleteableIngredient.new(ingredient)
+      else
+        SaveableIngredient.new(ingredient)
+      end
+    end
+
   end
 
   class IngredientBuilder

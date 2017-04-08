@@ -73,5 +73,25 @@ RSpec.describe "Meals" do
 
       expect(ingredient.name).to eq('New Name')
     end
+
+    it "should remove any ingredients if marked for deletion" do
+      mealbook_id = create(:mealbook).id
+      meal = create(:meal, mealbook_id: mealbook_id)
+      ingredient = create(:ingredient, meal: meal)
+      params = {
+        'meal' => {
+          'name' => 'Updated Name',
+          'desc' => '### Test',
+          'ingredients' => [
+            { id: ingredient.id, name: 'New Name', _delete: true },
+          ],
+          'mealbook_id' => mealbook_id
+        },
+      }
+
+      expect do
+        patch "/meals/#{meal.id}", params: params
+      end.to change(Ingredient, :count).from(1).to(0)
+    end
   end
 end

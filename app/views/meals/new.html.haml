@@ -2,6 +2,5 @@
 #mealForm.flex-auto
   = render "form", meal: Meal.new
 
-:javascript
-  window._currentMealbook = #{mealbook.to_json};
-  window._currentMeal = { mealbook_id: _currentMealbook.id, desc: null, name: null, ingredients: [] };
+
+= render 'javascript_variables', mealbook: mealbook, meal: MealForm.for(mealbook.meals.new)
