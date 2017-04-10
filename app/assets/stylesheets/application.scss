@@ -27,9 +27,10 @@ $green: #76cda4;
 .cursor:hover { cursor: pointer; }
 .fill-space { height: 100%; width: 100%; }
 .flex-1 { flex-grow: 1 }
+.flex-5 { flex-basis: 5%; }
 .flex-15 { flex-basis: 15%; }
 .flex-20 { flex-basis: 20%; }
-.flex-5 { flex-basis: 5%; }
+.flex-25 { flex-basis: 25%; }
 .flex-50 { flex-basis: 50%; }
 .flex-center { display: flex; align-items: center; justify-content: center; }
 .ht1 { height: 1rem }
@@ -38,9 +39,13 @@ $green: #76cda4;
 .ht4 { height: 4rem }
 .ht5 { height: 5rem }
 .ht6 { height: 6rem }
+.ht7 { height: 7rem }
+.ht8 { height: 8rem }
+.icon { height: 20px; width: 20px; }
 .normal { text-decoration: none; }
 .py1p5 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
 .relative { position: relative; }
+.rotate-90 { transform: rotate(90deg); }
 .rounded { border-radius: 4px; }
 .scroll-y { overflow-y: scroll; }
 .top-right { position: absolute; top: 0; right: 0; }
@@ -222,40 +227,41 @@ label {
 .weekday {
   min-width: 16rem;;
   width: 100%;
-
-  &-content {
-    background-color: white;
-    overflow: auto;
-    padding: 0.5rem;
-    position: relative;
-
-    &-dragging-over {
-      pointer-events: none;
-
-      .weekday-droppable-area { display: block }
-      * {
-        pointer-events: none;
-      }
-    }
-  }
-
-  &-droppable-area {
-    display: none;
-    height: 6rem;
-    background-color: #eee;
-    margin: 1rem;
-    border-radius: 3px;
-
-    &--active {
-      display: block;
-    }
-  }
-
-  &-meal {
-    background-color: $gray;
-    border-radius: 3px;
-  }
 }
+//
+//   &-content {
+//     background-color: white;
+//     overflow: auto;
+//     padding: 0.5rem;
+//     position: relative;
+//
+//     &-dragging-over {
+//       pointer-events: none;
+//
+//       .weekday-droppable-area { display: block }
+//       * {
+//         pointer-events: none;
+//       }
+//     }
+//   }
+//
+//   &-droppable-area {
+//     display: none;
+//     height: 6rem;
+//     background-color: #eee;
+//     margin: 1rem;
+//     border-radius: 3px;
+//
+//     &--active {
+//       display: block;
+//     }
+//   }
+//
+//   &-meal {
+//     background-color: $gray;
+//     border-radius: 3px;
+//   }
+// }
 
 .tab {
   padding: 0.5rem;
