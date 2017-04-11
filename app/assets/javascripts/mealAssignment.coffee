@@ -1,13 +1,13 @@
 iosDragDropShim = { enableEnterLeave: true }
 
+      # v-on:dragover="draggingOver"
+      # v-on:dragenter="draggingEnter"
+      # v-on:dragleave="draggingLeaving"
+      # v-on:drop="onDrop"
 Vue.component 'weekday-meal',
-  props: ["weekday", "mealAssigned", "removeAssignment", "verticalLayout"]
+  props: ["weekday", "mealAssigned", "removeAssignment", "verticalLayout", "mealIsBeingDragged"]
   template: """
     <div
-      v-on:dragover="draggingOver"
-      v-on:dragenter="draggingEnter"
-      v-on:dragleave="draggingLeaving"
-      v-on:drop="onDrop"
       v-bind:class="{'flex': !verticalLayout}"
       class="weekday bg-white rounded p1  flex-auto">
       <div v-bind:class="{ 'flex flex-auto': !verticalLayout }" >
@@ -19,14 +19,20 @@ Vue.component 'weekday-meal',
           <h4 class="center mt1 mb0">{{ weekday.table.title }}</h4>
           <h6 class="center mt0 mb2">{{ weekday.table.date }}</h6>
         </div>
-        <div v-if="meal" class="bg-grey flex-25 p1 rounded relative">
+        <div v-if="meal" class="bg-grey flex-25 mr1 p1 rounded relative">
           <span class="top-right box2 flex-center cursor" @click="removeAssignment(meal)">&times</span>
           <h3 class="center m0">{{ meal.name }}</h3>
           <h6>Notes</h6>
           <h6>Ingredients</h6>
         </div>
-        <div v-bind:class="{'bg-grey flex-25 ht6 p1 rounded relative': isDraggingOver }">
-         <span v-show="isLoading">Loading...</span>
+        <div
+          v-on:dragover="draggingOver"
+          v-on:dragenter="draggingEnter"
+          v-on:dragleave="draggingLeaving"
+          v-on:drop="onDrop"
+          v-bind:class="{'border-dashed flex-auto p1 rounded': mealIsBeingDragged }">
+          <span v-if='isDraggingOver'>DROP!</span>
+          <span v-show="isLoading">Loading...</span>
         </div>
       </div>
     </div>
@@ -46,7 +52,6 @@ Vue.component 'weekday-meal',
       evt.preventDefault()
       unless @isDraggingOver
         @isDraggingOver = true
-
     draggingEnter: (evt) ->
       evt.preventDefault()
       @isDraggingOver = true
@@ -66,12 +71,18 @@ Vue.component 'weekday-meal',
         @mealAssigned(resp.data.mealbook)
 
 Vue.component 'weekday-meals',
-  props: ["weekdays", "mealAssigned", "removeAssignment", "verticalLayout"]
+  props: ["weekdays", "mealAssigned", "removeAssignment", "verticalLayout", "mealIsBeingDragged"]
 
   template: """
     <div v-bind:class="{'flex-column': !verticalLayout}" class="weekday-meals px1 pb2 flex flex-1">
       <div v-for="(weekday, index) in weekdays" v-bind:class="{'pb2 ht8': !verticalLayout}" class="weekday px1 flex">
-        <weekday-meal :removeAssignment="removeAssignment" :mealAssigned="mealAssigned" :weekday="weekday" :verticalLayout="verticalLayout"></weekday-meal>
+        <weekday-meal
+          :removeAssignment="removeAssignment"
+          :mealAssigned="mealAssigned"
+          :weekday="weekday"
+          :mealIsBeingDragged='mealIsBeingDragged'
+          :verticalLayout="verticalLayout">
+        </weekday-meal>
       </div>
     </div>
   """
@@ -79,10 +90,13 @@ Vue.component 'weekday-meals',
 Vue.component 'meal-list-meal',
   props:
     meal: Object
+    startMealDrag: Function,
+    stopMealDrag: Function,
   template: """
     <div
       draggable="true"
       v-on:dragstart="draggingStarted"
+      v-on:dragend="draggingStopped"
       class="meal-list-meal relative">
 
       <span class="flex-1">{{ meal.name }}</span>
@@ -97,19 +111,12 @@ Vue.component 'meal-list-meal',
     mealUrl: ->
       "/meals/#{@meal.id}"
   methods:
-    touchStarted: (event) ->
-      event.preventDefault()
-      @startX = event.targetTouches[0].pageX
-      @startY = event.targetTouches[0].pageY
-      console.log @startX, @startY
-    touchMoving: (event) ->
-      event.preventDefault()
-      curX = event.targetTouches[0].pageX - @startX
-      curY = event.targetTouches[0].pageY - @startY
-      event.targetTouches[0].target.style.webkitTransform = 'translate(' + curX + 'px, ' + curY + 'px)';
     draggingStarted: (evt) ->
       @draggingHasStarted = true
+      @startMealDrag()
       evt.dataTransfer.setData("text", @meal.id)
+    draggingStopped: (evt) ->
+      @stopMealDrag()
 
 document.addEventListener "turbolinks:load", ->
   if document.getElementById("mealbook")
@@ -141,7 +148,12 @@ document.addEventListener "turbolinks:load", ->
               </div>
             </section>
             <section class='main-weekdays flex flex-auto items-strech'>
-              <weekday-meals :weekdays="weekdays" :removeAssignment="destroyAssignment" :mealAssigned="updateWeek" :verticalLayout="verticalLayout">
+              <weekday-meals
+                :weekdays="weekdays"
+                :removeAssignment="destroyAssignment"
+                :mealAssigned="updateWeek"
+                :mealIsBeingDragged='mealIsBeingDragged'
+                :verticalLayout="verticalLayout">
               </weekday-meals>
             </section>
           </div>
@@ -149,7 +161,14 @@ document.addEventListener "turbolinks:load", ->
             <div @click="showMealDrawer = !showMealDrawer" class="main-meals__toggle">&times</div>
             <div class='meal-list' id='mealbookMeals'>
               <h4 class="mt0 mb1">Meals</h4>
-              <meal-list-meal v-bind:meal='meal' :key="meal.id" v-for='(meal, index) in meals'></meal-list-meal>
+              <meal-list-meal
+                :mealIsBeingDragged='mealIsBeingDragged'
+                :stopMealDrag='stopMealDrag'
+                :startMealDrag='startMealDrag'
+                :meal='meal'
+                :key="meal.id"
+                v-for='(meal, index) in meals'>
+              </meal-list-meal>
             </div>
           </section>
         </main>
@@ -158,12 +177,17 @@ document.addEventListener "turbolinks:load", ->
         mealbook: window._currentMealbook
         showMealDrawer: true
         verticalLayout: false
+        mealIsBeingDragged: false
       computed:
         weekdays: () ->
           @mealbook.weekdays
         meals: ->
           @mealbook.meals
       methods:
+        startMealDrag: () ->
+          @mealIsBeingDragged = true
+        stopMealDrag: () ->
+          @mealIsBeingDragged = false
         updateWeek: (newMealbook) ->
           @mealbook = newMealbook
         renderPrevWeek: () ->
