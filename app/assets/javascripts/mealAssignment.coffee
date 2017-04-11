@@ -1,9 +1,5 @@
 iosDragDropShim = { enableEnterLeave: true }
 
-      # v-on:dragover="draggingOver"
-      # v-on:dragenter="draggingEnter"
-      # v-on:dragleave="draggingLeaving"
-      # v-on:drop="onDrop"
 Vue.component 'weekday-meal',
   props: ["weekday", "mealAssigned", "removeAssignment", "verticalLayout", "mealIsBeingDragged"]
   template: """

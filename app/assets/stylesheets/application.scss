@@ -229,40 +229,6 @@ label {
   min-width: 16rem;;
   width: 100%;
 }
-//
-//   &-content {
-//     background-color: white;
-//     overflow: auto;
-//     padding: 0.5rem;
-//     position: relative;
-//
-//     &-dragging-over {
-//       pointer-events: none;
-//
-//       .weekday-droppable-area { display: block }
-//       * {
-//         pointer-events: none;
-//       }
-//     }
-//   }
-//
-//   &-droppable-area {
-//     display: none;
-//     height: 6rem;
-//     background-color: #eee;
-//     margin: 1rem;
-//     border-radius: 3px;
-//
-//     &--active {
-//       display: block;
-//     }
-//   }
-//
-//   &-meal {
-//     background-color: $gray;
-//     border-radius: 3px;
-//   }
-// }
 
 .tab {
   padding: 0.5rem;
