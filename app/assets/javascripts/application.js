@@ -11,13 +11,13 @@
 // about supported directives.
 //
 //= require turbolinks
-//= require touch_dnd_shim
 //= require axios
 //= require vue
 //= require meal
 //= require mealAssignment
 
 // NO //= require jquery //= require jquery_ujs
+// NO //= require touch_dnd_shim
 function getCSRFToken() {
   return document.querySelector("meta[name='csrf-token']").content
 }
