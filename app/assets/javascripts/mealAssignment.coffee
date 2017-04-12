@@ -5,8 +5,8 @@ Vue.component 'weekday-meal',
   template: """
     <div
       v-bind:class="{'flex': !verticalLayout}"
-      class="weekday bg-white p1 relative rounded flex-auto">
-      <div v-bind:class="{ 'flex flex-auto': !verticalLayout }" >
+      class="weekday bg-white flex flex-auto p1 relative rounded">
+      <div class="flex flex-auto" :class="{ 'flex-column': verticalLayout }" >
         <div v-if="isToday" class="box2 p1 c-green" :class="{ 'top-left': !verticalLayout, 'top-right': verticalLayout }">
           <svg fill="currentColor" viewBox="0 0 20 20"><polygon points="10 15 4.122 18.09 5.245 11.545 .489 6.91 7.061 5.955 10 0 12.939 5.955 19.511 6.91 14.755 11.545 15.878 18.09"/></svg>
         </div>
@@ -15,11 +15,9 @@ Vue.component 'weekday-meal',
           <h4 class="center mt1 mb0">{{ weekday.table.title }}</h4>
           <h6 class="center mt0 mb2">{{ weekday.table.date }}</h6>
         </div>
-        <div v-if="meal" class="bg-grey flex-25 mr1 p1 rounded relative">
+        <div v-if="meal" class="bg-grey flex-center p1 rounded relative" :class="{ 'flex-15 mb2': verticalLayout, 'flex-25 mr1': !verticalLayout }">
           <span class="top-right box2 flex-center cursor" @click="removeAssignment(meal)">&times</span>
-          <h3 class="center m0">{{ meal.name }}</h3>
-          <h6>Notes</h6>
-          <h6>Ingredients</h6>
+          <h5 class="center m0">{{ meal.name }}</h5>
         </div>
         <div
           v-on:dragover="draggingOver"
