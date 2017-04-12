@@ -49,6 +49,7 @@ $green: #76cda4;
 .rotate-90 { transform: rotate(90deg); }
 .rounded { border-radius: 4px; }
 .scroll-y { overflow-y: scroll; }
+.top-left { position: absolute; top: 0; left: 0; }
 .top-right { position: absolute; top: 0; right: 0; }
 .w1 { width: 1rem }
 .w2 { width: 2rem }

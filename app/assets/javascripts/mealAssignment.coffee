@@ -5,9 +5,9 @@ Vue.component 'weekday-meal',
   template: """
     <div
       v-bind:class="{'flex': !verticalLayout}"
-      class="weekday bg-white rounded p1  flex-auto">
+      class="weekday bg-white p1 relative rounded flex-auto">
       <div v-bind:class="{ 'flex flex-auto': !verticalLayout }" >
-        <div v-if="isToday" class="top-right box2 p1 c-green">
+        <div v-if="isToday" class="box2 p1 c-green" :class="{ 'top-left': !verticalLayout, 'top-right': verticalLayout }">
           <svg fill="currentColor" viewBox="0 0 20 20"><polygon points="10 15 4.122 18.09 5.245 11.545 .489 6.91 7.061 5.955 10 0 12.939 5.955 19.511 6.91 14.755 11.545 15.878 18.09"/></svg>
         </div>
 
@@ -26,8 +26,10 @@ Vue.component 'weekday-meal',
           v-on:dragenter="draggingEnter"
           v-on:dragleave="draggingLeaving"
           v-on:drop="onDrop"
-          v-bind:class="{'border-dashed flex-auto p1 rounded': mealIsBeingDragged }">
-          <span v-if='isDraggingOver'>DROP!</span>
+          v-bind:class="{'border-dashed flex-auto flex-center p1 rounded': mealIsBeingDragged }">
+          <div v-show='isDraggingOver' class="box2 c-green" style="pointer-events: none;">
+            <svg fill="currentColor" viewBox="0 0 20 20"><path d="M11 9V5H9v4H5v2h4v4h2v-4h4V9h-4zm-1 11a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/></svg>
+          </div>
           <span v-show="isLoading">Loading...</span>
         </div>
       </div>
