@@ -1,5 +1,8 @@
 iosDragDropShim = { enableEnterLeave: true }
 
+contains = (searchText) ->
+  (meal) => meal.name.includes(searchText)
+
 Vue.component 'weekday-meal',
   props: ["weekday", "mealAssigned", "removeAssignment", "verticalLayout", "mealIsBeingDragged"]
   template: """
@@ -93,9 +96,8 @@ Vue.component 'meal-list-meal',
       draggable="true"
       v-on:dragstart="draggingStarted"
       v-on:dragend="draggingStopped"
-      class="meal-list-meal relative">
-
-      <span class="flex-1">{{ meal.name }}</span>
+      class="flex bg-white ht4 items-center justify-between mb1 p1 rounded">
+      <span class="flex-1 font0875 w1">{{ meal.name }}</span>
       <a v-bind:href="mealUrl" class="box2 c-gray">
         <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
       </a>
@@ -157,6 +159,16 @@ document.addEventListener "turbolinks:load", ->
             <div @click="showMealDrawer = !showMealDrawer" class="main-meals__toggle">&times</div>
             <div class='meal-list' id='mealbookMeals'>
               <h4 class="mt0 mb1">Meals</h4>
+              <div class="flex pb2">
+                <div class="flex-auto relative">
+                  <input v-model="searchText" type="text" class="input" placeholder="Search..."/>
+                  <div v-show="searchText.length" class="cursor flex-center ht3 lnht3 pr1 top-right w2">
+                    <svg @click="searchText = ''" class="box2" style="color: grey;" viewBox="0 0 20 20">
+                      <path fill="currentColor" d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm1.41-1.41A8 8 0 1 0 15.66 4.34 8 8 0 0 0 4.34 15.66zM11.41 10l2.83 2.83-1.41 1.41L10 11.41l-2.83 2.83-1.41-1.41L8.59 10 5.76 7.17l1.41-1.41L10 8.59l2.83-2.83 1.41 1.41L11.41 10z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
               <meal-list-meal
                 :mealIsBeingDragged='mealIsBeingDragged'
                 :stopMealDrag='stopMealDrag'
@@ -174,11 +186,12 @@ document.addEventListener "turbolinks:load", ->
         showMealDrawer: true
         verticalLayout: false
         mealIsBeingDragged: false
+        searchText: "",
       computed:
         weekdays: () ->
           @mealbook.weekdays
         meals: ->
-          @mealbook.meals
+          @mealbook.meals.filter(contains(@searchText))
       methods:
         startMealDrag: () ->
           @mealIsBeingDragged = true

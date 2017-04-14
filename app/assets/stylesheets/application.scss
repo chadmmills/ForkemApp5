@@ -34,6 +34,9 @@ $green: #76cda4;
 .flex-25 { flex-basis: 25%; }
 .flex-50 { flex-basis: 50%; }
 .flex-center { display: flex; align-items: center; justify-content: center; }
+.font075 { font-size: .75rem; }
+.font0875 { font-size: .875rem; }
+.font1 { font-size: 1rem; }
 .ht1 { height: 1rem }
 .ht2 { height: 2rem }
 .ht3 { height: 3rem }
@@ -43,6 +46,10 @@ $green: #76cda4;
 .ht7 { height: 7rem }
 .ht8 { height: 8rem }
 .icon { height: 20px; width: 20px; }
+.lnht1 { line-height: 1rem; }
+.lnht2 { line-height: 2rem; }
+.lnht3 { line-height: 3rem; }
+.lnht4 { line-height: 4rem; }
 .normal { text-decoration: none; }
 .py1p5 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
 .relative { position: relative; }
@@ -55,6 +62,8 @@ $green: #76cda4;
 .w2 { width: 2rem }
 .w3 { width: 3rem }
 .w4 { width: 4rem }
+.w100 { width: 100%; }
+
 
 /******************************************************************************
   ELEMENTS
@@ -114,7 +123,7 @@ label {
 }
 
 .input, .textarea {
-  padding: 0.75rem 0.5rem;
+  padding: 0 0.5rem;
   font-size: 0.875rem;
   width: 100%;
   border-style: initial;
@@ -130,6 +139,10 @@ label {
       border-bottom: 2px solid $green;
     }
   }
+}
+.input {
+  height: 3rem;
+  line-height: 3rem;
 }
 
 .textarea {
@@ -219,7 +232,6 @@ label {
     align-items: center;
     background-color: white;
     border-radius: 3px;
-    display: flex;
     height: 4rem;
     margin-bottom: 1rem;
     padding: 0.5rem;
