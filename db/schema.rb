@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170321040127) do
+ActiveRecord::Schema.define(version: 20170418012454) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 20170321040127) do
     t.uuid     "meal_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
-    t.index ["assigned_on", "meal_id"], name: "index_meal_assignments_on_assigned_on_and_meal_id", unique: true, using: :btree
+    t.index ["assigned_on", "meal_id"], name: "index_meal_assignments_on_assigned_on_and_meal_id", using: :btree
     t.index ["meal_id"], name: "index_meal_assignments_on_meal_id", using: :btree
   end
 
