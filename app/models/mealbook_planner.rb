@@ -40,7 +40,7 @@ class MealbookPlanner
   end
 
   def meals
-    mealbook.meals
+    mealbook.meals.select(:id, :name)
   end
 
   def assigned_meals
