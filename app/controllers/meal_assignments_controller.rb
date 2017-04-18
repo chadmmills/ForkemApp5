@@ -1,17 +1,22 @@
 class MealAssignmentsController < ApplicationController
   def create
-    MealAssignment.create!(
-      assigned_on: params[:weekdate],
-      meal_id: params[:meal_id],
+    mealbook = Mealbook.find_mealbook_for_meal_id(params[:meal_id])
+    meal_assigner = MealAssigner.new(
+      mealbook_assignment: mealbook,
+      assignment_date: params[:weekdate],
     )
 
-    render json: {
-      params: params,
-      mealbook: MealbookPlanner.new(
-        mealbook: Meal.find(params[:meal_id]).mealbook,
-        current_date: Date.parse(params[:weekdate]).beginning_of_week
-      )
-    }
+    if (meal_assigner.save)
+      render json: {
+        params: params,
+        mealbook: MealbookPlanner.new(
+          mealbook: Meal.find(params[:meal_id]).mealbook,
+          current_date: Date.parse(params[:weekdate]).beginning_of_week
+        )
+      }
+    else
+      render json: {}, status: 422
+    end
   end
 
   def destroy
