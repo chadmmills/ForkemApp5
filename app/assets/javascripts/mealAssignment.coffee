@@ -4,7 +4,12 @@ contains = (searchText) ->
   (meal) => meal.name.includes(searchText)
 
 Vue.component 'weekday-meal',
-  props: ["weekday", "mealAssigned", "removeAssignment", "verticalLayout", "mealIsBeingDragged"]
+  props:
+    weekday: Object
+    mealAssigned: Function,
+    removeAssignment: Function,
+    verticalLayout: Boolean,
+    mealIsBeingDragged: Boolean
   template: """
     <div
       v-bind:class="{'flex': !verticalLayout}"
@@ -13,7 +18,6 @@ Vue.component 'weekday-meal',
         <div v-if="isToday" class="box2 p1 c-green" :class="{ 'top-left': !verticalLayout, 'top-right': verticalLayout }">
           <svg fill="currentColor" viewBox="0 0 20 20"><polygon points="10 15 4.122 18.09 5.245 11.545 .489 6.91 7.061 5.955 10 0 12.939 5.955 19.511 6.91 14.755 11.545 15.878 18.09"/></svg>
         </div>
-
         <div v-bind:class="{'flex-25 pr2 flex-center flex-column': !verticalLayout}" >
           <h4 class="center mt1 mb0">{{ weekday.table.title }}</h4>
           <h6 class="center mt0 mb2">{{ weekday.table.date }}</h6>
@@ -27,7 +31,7 @@ Vue.component 'weekday-meal',
           v-on:dragenter="draggingEnter"
           v-on:dragleave="draggingLeaving"
           v-on:drop="onDrop"
-          v-bind:class="{'border-dashed flex-auto flex-center p1 rounded': mealIsAbleToBeDropped }">
+          v-bind:class="{'border-dashed flex-auto flex-center p1 rounded': mealIsAbleToBeDropped, 'ml1': (mealIsAbleToBeDropped && !verticalLayout) }">
           <div v-show='isDraggingOver' class="box2 c-green" style="pointer-events: none;">
             <svg fill="currentColor" viewBox="0 0 20 20"><path d="M11 9V5H9v4H5v2h4v4h2v-4h4V9h-4zm-1 11a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/></svg>
           </div>
