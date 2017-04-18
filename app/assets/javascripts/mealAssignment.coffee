@@ -66,8 +66,12 @@ Vue.component 'weekday-meal',
       .then (resp) =>
         @isDraggingOver = false
         @isLoading = false
-        #console.info(resp)
         @mealAssigned(resp.data.mealbook)
+      .catch (error) =>
+        @isDraggingOver = false
+        @isLoading = false
+        alert "Yikes, something went wrong :("
+
 
 Vue.component 'weekday-meals',
   props: ["weekdays", "mealAssigned", "removeAssignment", "verticalLayout", "mealIsBeingDragged"]
