@@ -178,6 +178,15 @@ document.addEventListener "turbolinks:load", ->
                   </div>
                 </div>
               </div>
+              <a
+                :href="newMealUrl"
+                v-show="noMeals"
+                class="flex border-dashed ht4 items-center justify-between mb1 p1 rounded text-decoration-none">
+                Create First Meal
+                <svg class="box2 c-black" viewBox="0 0 20 20">
+                  <path fill="currentColor" d="M11 9V5H9v4H5v2h4v4h2v-4h4V9h-4zm-1 11a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/>
+                </svg>
+              </a>
               <meal-list-meal
                 :mealIsBeingDragged='mealIsBeingDragged'
                 :stopMealDrag='stopMealDrag'
@@ -201,6 +210,8 @@ document.addEventListener "turbolinks:load", ->
           @mealbook.weekdays
         meals: ->
           @mealbook.meals.filter(contains(@searchText))
+        newMealUrl: -> "/mealbooks/#{@mealbook.id}/meals/new"
+        noMeals: -> @mealbook.meals.length is 0
       methods:
         startMealDrag: () ->
           @mealIsBeingDragged = true

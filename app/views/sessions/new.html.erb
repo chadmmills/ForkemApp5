@@ -1,6 +1,8 @@
-<div id="clearance" class="sign-in">
-  <h2><%= t(".title") %></h2>
+<div id="clearance" class="sign-in content flex-center main">
+  <div class="bg-white flex-50 p3 rounded">
+    <h1 class="center"><%= t("app_name") %></h1>
+    <h4 class="center"><%= t(".title") %></h4>
 
-  <%= render partial: '/sessions/form' %>
-
+    <%= render partial: '/sessions/form' %>
+  </div>
 </div>

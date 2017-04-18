@@ -1,5 +1,7 @@
-<div id="flash-msg">
-  <% flash.each do |key, value| %>
-    <div class="flash <%= key %>"><%= value %></div>
-  <% end %>
-</div>
+<% unless flash.empty? %>
+  <div id="flash-msg" class="fixed flex-center ht3 mxa mt1 w100">
+    <% flash.each do |key, value| %>
+      <div class="flash <%= key %> bg-white flex-center ht3 px3 rounded"><%= value %></div>
+    <% end %>
+  </div>
+<% end %>
