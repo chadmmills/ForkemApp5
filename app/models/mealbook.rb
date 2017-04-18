@@ -30,6 +30,7 @@ class Mealbook < ApplicationRecord
       select("meals.*, meal_assignments.id AS assignment_id").
       select("meal_assignments.assigned_on").
       where(meal_assignments: { assigned_on: date_range }).
+      order("meal_assignments.assigned_on, meal_assignments.created_at").
       to_a
   end
 
