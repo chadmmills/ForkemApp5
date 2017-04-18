@@ -44,7 +44,7 @@ class MealbookPlanner
   end
 
   def assigned_meals
-    @_assigned_meals ||= mealbook.meals_assigned_within_range(week_range).to_a
+    @_assigned_meals ||= mealbook.meals_assigned_within_range(week_range)
   end
 
   def week_range
@@ -56,17 +56,9 @@ class MealbookPlanner
       OpenStruct.new(
         title: dateObj.strftime("%A"),
         date: dateObj.to_s,
-        meal: assigned_meals.detect { |m| m.assigned_on == dateObj }
+        meals: assigned_meals.select { |m| m.assigned_on == dateObj }
       )
     end
   end
 
-  class MealbookMeal
-    def as_json
-      {
-        title: "meal title",
-      }
-    end
-
-  end
 end

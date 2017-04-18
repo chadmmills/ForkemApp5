@@ -17,18 +17,23 @@ class Mealbook < ApplicationRecord
     write_attribute(:name, name_value)
   end
 
-  def meal_assignments(meal_assignment: MealAssignment)
-    meal_assignment.where(meal_id: meals.select(:id))
+  def meal_assignments
+    meal_assignments_query.to_a
   end
 
   def meal_assignments_for_day(assignment_date)
-    meal_assignments.where(assigned_on: assignment_date).to_a
+    meal_assignments_query.where(assigned_on: assignment_date).to_a
   end
 
   def meals_assigned_within_range(date_range)
     meals.joins(:meal_assignments).
       select("meals.*, meal_assignments.id AS assignment_id").
       select("meal_assignments.assigned_on").
-      where(meal_assignments: { assigned_on: date_range })
+      where(meal_assignments: { assigned_on: date_range }).
+      to_a
+  end
+
+  def meal_assignments_query(meal_assignment: MealAssignment)
+    meal_assignment.joins(:meal).where(meals: { mealbook_id: self.id })
   end
 end

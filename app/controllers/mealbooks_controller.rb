@@ -3,7 +3,7 @@ class MealbooksController < ApplicationController
   layout "meal_planner", except: %i(index create)
 
   def index
-    render locals: { mealbooks: current_user.mealbooks }
+    render locals: { mealbooks: current_user_mealbooks }
   end
 
   def show
@@ -32,7 +32,7 @@ class MealbooksController < ApplicationController
   private
 
   def current_user_mealbooks
-    []
+    current_user.mealbooks
   end
 
   def mealbook
@@ -45,16 +45,6 @@ class MealbooksController < ApplicationController
 
   def weekday
     @_weekday ||= Date.parse(params[:weekdate]) rescue Date.today.beginning_of_week
-  end
-
-  def weekdays
-    (weekday.beginning_of_week..weekday.end_of_week).map do |dateObj|
-      OpenStruct.new(
-        title: dateObj.strftime("%A"),
-        date: dateObj.to_s,
-        meal: { id: 123 }
-      )
-    end
   end
 
   class MealbookCreator

@@ -18,7 +18,7 @@ Vue.component 'weekday-meal',
           <h4 class="center mt1 mb0">{{ weekday.table.title }}</h4>
           <h6 class="center mt0 mb2">{{ weekday.table.date }}</h6>
         </div>
-        <div v-if="meal" class="bg-grey flex-center p1 rounded relative" :class="{ 'flex-15 mb2': verticalLayout, 'flex-25 mr1': !verticalLayout }">
+        <div v-for="(meal, index) in meals" class="bg-grey flex-center p1 rounded relative" :class="{ 'flex-15 mb2': verticalLayout, 'flex-25 ml1': !verticalLayout }">
           <span class="top-right box2 flex-center cursor" @click="removeAssignment(meal)">&times</span>
           <h5 class="center m0">{{ meal.name }}</h5>
         </div>
@@ -40,7 +40,7 @@ Vue.component 'weekday-meal',
     isDraggingOver: false
     isLoading: false
   computed:
-    meal: -> @weekday.table.meal
+    meals: -> @weekday.table.meals
     isToday: ->
       todaysDate = new Date()
       mealDate = new Date(@weekday.table.date)
