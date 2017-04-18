@@ -27,7 +27,7 @@ Vue.component 'weekday-meal',
           v-on:dragenter="draggingEnter"
           v-on:dragleave="draggingLeaving"
           v-on:drop="onDrop"
-          v-bind:class="{'border-dashed flex-auto flex-center p1 rounded': mealIsBeingDragged }">
+          v-bind:class="{'border-dashed flex-auto flex-center p1 rounded': mealIsAbleToBeDropped }">
           <div v-show='isDraggingOver' class="box2 c-green" style="pointer-events: none;">
             <svg fill="currentColor" viewBox="0 0 20 20"><path d="M11 9V5H9v4H5v2h4v4h2v-4h4V9h-4zm-1 11a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/></svg>
           </div>
@@ -41,6 +41,7 @@ Vue.component 'weekday-meal',
     isLoading: false
   computed:
     meals: -> @weekday.table.meals
+    mealIsAbleToBeDropped: -> @mealIsBeingDragged && (@meals.length < 3)
     isToday: ->
       todaysDate = new Date()
       mealDate = new Date(@weekday.table.date)
