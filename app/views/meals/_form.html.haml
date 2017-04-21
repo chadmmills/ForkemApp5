@@ -24,14 +24,25 @@
     .p2
 
     = render "/shared/box" do
-      %h2 Ingredients
-      .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients" }
-        %input.input.inline.flex-15{ "v-model": "ingredient.quantity" }
-        .select.flex-15
-          = select_tag :measurement_unit,
-            options_for_select( ["TSP", "TSB", "Oz"]),
-            "v-model": "ingredient.measurement_unit"
-        %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
-        %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)" }
-          &times
-      = f.button "Add", "v-on:click.prevent": "addIngredient"
+      %h2.center Ingredients
+      .flex-center.ht3
+        .tab{ "v-bind:class": "{ 'tab--active': activeIngTab === 'list' }",
+              "v-on:click": "activeIngTab = 'list'" }
+          List
+        .tab{ "v-bind:class": "{ 'tab--active': activeIngTab === 'paste' }",
+              "v-on:click": "activeIngTab = 'paste'" }
+          Paste
+      %div{ "v-show": "activeIngTab === 'list'" }
+        .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients" }
+          %input.input.inline.flex-15{ "v-model": "ingredient.quantity" }
+          .select.flex-15
+            = select_tag :measurement_unit,
+              options_for_select( ["TSP", "TSB", "Oz"]),
+              "v-model": "ingredient.measurement_unit"
+          %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
+          %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)" }
+            &times
+        = f.button "Add", "v-on:click.prevent": "addIngredient"
+      %div{ "v-show": "activeIngTab === 'paste'" }
+        %textarea.textarea{ "v-model": "parseableIngredientText" }
+        %button{ "@click": "parseText"} Parse

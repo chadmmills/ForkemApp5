@@ -4,8 +4,10 @@ document.addEventListener "turbolinks:load", ->
       el: "#mealForm"
       data:
         activeTab: 'write'
+        activeIngTab: 'list'
         generatedHTML: ""
         meal: window._currentMeal
+        parseableIngredientText: ""
       computed:
         visibleIngredients: ->
           @meal.ingredients.filter (i) -> not i._delete
