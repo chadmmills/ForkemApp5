@@ -12,12 +12,16 @@ document.addEventListener "turbolinks:load", ->
         visibleIngredients: ->
           @meal.ingredients.filter (i) -> not i._delete
       methods:
-        removeIngredient: (ingredient) ->
-          ingredient._delete = true
         addIngredient: () ->
           @meal.ingredients.push(
             {id: Date.now(), name: null, measurement_unit: null, _delete: false}
           )
+        parseText: () ->
+          console.log(@parseableIngredientText)
+          Axios.post("/parsed-ingredients", { text: @parseableIngredientText })
+            .then (resp) => @meal.ingredients = @meal.ingredients.concat(resp.data.ingredients)
+        removeIngredient: (ingredient) ->
+          ingredient._delete = true
         previewDescription: () ->
           @activeTab = 'preview'
           Axios.post("/utilities/markdown", { text: @meal.desc})

@@ -12,6 +12,15 @@ class IngredientExtractor
   def parsed_ingredients
     @_parsed_ingredients ||= []
   end
+
+  def success?
+    parsed_ingredients.any?
+  end
+
+  def error_message
+    'We were unable to process any ingredients :('
+  end
+
   private
   attr_reader :text
 
@@ -31,7 +40,7 @@ class IngredientExtractor
       {
         quantity: quantity.to_s,
         measurement_unit: measurement_unit.to_s,
-        desc: desc,
+        name: name,
       }
     end
 
@@ -49,20 +58,18 @@ class IngredientExtractor
       @measurement_unit ||= measurement_extractor.extract_measurement_from(words)
     end
 
-    def desc
-      words.select(&:include_in_desc?).join(" ")
+    def name
+      words.select(&:include_in_name?).join(" ")
     end
   end
 
   class Word < SimpleDelegator
-    attr_accessor :include_in_desc
+    attr_accessor :include_in_name
     def initialize(word)
       super(word)
-      @include_in_desc = true
+      @include_in_name = true
     end
-    def include_in_desc?
-      include_in_desc
-    end
+    alias :include_in_name? :include_in_name
   end
 
   class MeasurementExtractor
@@ -76,7 +83,7 @@ class IngredientExtractor
     class NonDescriptiveUnit < Base
       def initialize(measurement_word, words)
         super(measurement_word, words)
-        measurement_word.include_in_desc = false
+        measurement_word.include_in_name = false
       end
     end
 
@@ -109,6 +116,10 @@ class IngredientExtractor
         "ounces"    => OZUnit,
       }
     end
+
+    def self.measurement_unit_options
+      measurement_units.values.compact.map(&:new).map(&:to_s)
+    end
   end
 
 
@@ -122,13 +133,13 @@ class IngredientExtractor
     end
     def self.extract_qty_from(quantity_string)
       if quantity_string.include?("/")
-        quantity_string.include_in_desc = false
+        quantity_string.include_in_name = false
         Quantity.new(quantity_string.to_r)
       elsif quantity_string.include?(".") && quantity_string.to_f != 0.0
-        quantity_string.include_in_desc = false
+        quantity_string.include_in_name = false
         Quantity.new(quantity_string.to_f)
       elsif quantity_string.to_i != 0
-        quantity_string.include_in_desc = false
+        quantity_string.include_in_name = false
         Quantity.new(quantity_string.to_i)
       else
         NullQuantity.new

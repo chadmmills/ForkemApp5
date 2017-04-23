@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   end
   resources :meals
   resources :meal_assignments, path: "meal-assignments"
+  resources :parsed_ingredients, path: "parsed-ingredients", only: [:create]
 
   namespace :utilities do
     resources :markdown, only: :create

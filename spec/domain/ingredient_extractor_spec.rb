@@ -6,7 +6,7 @@ RSpec.describe IngredientExtractor do
       ingredient_from_line = described_class.new("3 pound pork shoulder, trimmed of excess fat")
 
       expect(ingredient_from_line.data).to match(
-        { quantity: "3", measurement_unit: "LB", desc: "pork shoulder, trimmed of excess fat" }
+        { quantity: "3", measurement_unit: "LB", name: "pork shoulder, trimmed of excess fat" }
       )
     end
   end
@@ -37,16 +37,16 @@ RSpec.describe IngredientExtractor do
       extractor.process
 
       expect(extractor.parsed_ingredients.first).to match(
-        { quantity: "3", measurement_unit: "LB", desc: "pork shoulder, trimmed of excess fat" }
+        { quantity: "3", measurement_unit: "LB", name: "pork shoulder, trimmed of excess fat" }
       )
       expect(extractor.parsed_ingredients.third).to match(
-        { quantity: "2", measurement_unit: "EA", desc: "(14.5 oz) cans diced tomatoes" }
+        { quantity: "2", measurement_unit: "EA", name: "(14.5 oz) cans diced tomatoes" }
       )
       expect(extractor.parsed_ingredients.fourth).to match(
-        { quantity: "16", measurement_unit: "OZ", desc: "beef stock" }
+        { quantity: "16", measurement_unit: "OZ", name: "beef stock" }
       )
       expect(extractor.parsed_ingredients.last).to match(
-        { quantity: "1", measurement_unit: "EA", desc: "pinch of salt and pepper" }
+        { quantity: "1", measurement_unit: "EA", name: "pinch of salt and pepper" }
       )
     end
   end
