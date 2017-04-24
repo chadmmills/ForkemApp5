@@ -1,6 +1,6 @@
 class ParsedIngredientsController < ApplicationController
   def create
-    parser = IngredientExtractor.new(params[:text])
+    parser = IngredientExtractor.for(params[:text])
     parser.process
 
     if parser.success?

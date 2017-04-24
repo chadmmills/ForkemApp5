@@ -11,13 +11,26 @@ RSpec.describe IngredientExtractor do
     end
   end
 
+  describe IngredientExtractor::MeasurementExtractor do
+    it 'should return null unit if measurement not found' do
+      class FakeWord
+        def downcase; 'somecrazykeywedonthave'; end
+      end
+      null_unit = described_class.extract_measurement_from(
+        [FakeWord.new]
+      )
+
+      expect(null_unit.to_s).to eq("EA")
+    end
+  end
+
   describe 'text processing' do
     it 'should split out quantity' do
       text = "3 pound pork shoulder, trimmed of excess fat
               1/2 cup sliced red onion
               2 (14.5 oz) cans diced tomatoes
               pinch of salt and pepper"
-      extractor = described_class.new(text)
+      extractor = described_class.for(text)
 
       extractor.process
 
@@ -32,7 +45,7 @@ RSpec.describe IngredientExtractor do
               2 (14.5 oz) cans diced tomatoes
               16 oz beef stock
               pinch of salt and pepper"
-      extractor = described_class.new(text)
+      extractor = described_class.for(text)
 
       extractor.process
 
