@@ -30,6 +30,7 @@ module IngredientExtractor
     def self.measurement_units
       {
         "pound"     => LBUnit,
+        "pounds"    => LBUnit,
         "lb"        => LBUnit,
         "lbs"       => LBUnit,
         "cup"       => CupUnit,

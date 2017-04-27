@@ -4,10 +4,11 @@ document.addEventListener "turbolinks:load", ->
       el: "#mealForm"
       data:
         activeTab: 'write'
-        activeIngTab: 'list'
+        activeIngTab: 'list' # list || paste
         generatedHTML: ""
         meal: window._currentMeal
         parseableIngredientText: ""
+        showParsedSuccessMsg: false
       computed:
         visibleIngredients: ->
           @meal.ingredients.filter (i) -> not i._delete
@@ -16,10 +17,17 @@ document.addEventListener "turbolinks:load", ->
           @meal.ingredients.push(
             {id: Date.now(), name: null, measurement_unit: null, _delete: false}
           )
+        clearParsedIngredients: () ->
+          @showParsedSuccessMsg = false
+          @parseableIngredientText = ""
+          @activeIngTab = 'list'
         parseText: () ->
           console.log(@parseableIngredientText)
           Axios.post("/parsed-ingredients", { text: @parseableIngredientText })
-            .then (resp) => @meal.ingredients = @meal.ingredients.concat(resp.data.ingredients)
+            .then (resp) =>
+              @meal.ingredients = @meal.ingredients.concat(resp.data.ingredients)
+              @showParsedSuccessMsg = true
+              setTimeout @clearParsedIngredients, 500
         removeIngredient: (ingredient) ->
           ingredient._delete = true
         previewDescription: () ->

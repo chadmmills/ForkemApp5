@@ -43,3 +43,4 @@
       %div{ "v-show": "activeIngTab === 'paste'" }
         %textarea.textarea{ "v-model": "parseableIngredientText" }
         %button{ "@click.prevent": "parseText"} Parse
+        %span.c-green.pl1{ "v-show": "showParsedSuccessMsg" } Done &#10003;
