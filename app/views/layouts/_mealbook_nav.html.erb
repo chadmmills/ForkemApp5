@@ -1,0 +1,16 @@
+<%= render '/layouts/nav/container' do %>
+  <%= render '/layouts/nav/return_link', text: planner_nav.home, url: planner_nav.home_url %>
+  <%= render '/layouts/nav/title', text: planner_nav.name %>
+  <%= render '/layouts/nav/actions' do %>
+    <%= render '/layouts/nav/action' do %>
+      <%= link_to planner_nav.grocery_list_url, class: "box2 flex-center normal" do %>
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w2">
+          <path d="M4 2h16l-3 9H4a1 1 0 1 0 0 2h13v2H4a3 3 0 0 1 0-6h.33L3 5 2 2H0V0h3a1 1 0 0 1 1 1v1zm1 18a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
+        </svg>
+      <% end %>
+    <% end %>
+    <%= render '/layouts/nav/action' do %>
+      <%= link_to raw("&#43;"), planner_nav.new_meal_url, class: "box2 flex-center circle bg-green c-white normal" %>
+    <% end %>
+  <% end %>
+<% end %>

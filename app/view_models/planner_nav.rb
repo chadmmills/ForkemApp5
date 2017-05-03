@@ -3,25 +3,31 @@ module PlannerNav
   class Default < SimpleDelegator
     include Rails.application.routes.url_helpers
     def mealbook; __getobj__; end
-  end
-
-  class DefaultNav < Default
-    def left_link?; true; end
-    def left_link_name; name; end
-    def left_link_url; mealbook; end
-    def right_link?; true; end
-    def right_link_url
-      new_mealbook_meal_path(mealbook)
+    def template
+      "/layouts/default_nav"
     end
   end
 
+  class DefaultNav < Default
+    def home; name; end
+    def home_url; mealbook; end
+  end
+
   class MealbookPlannerNav < Default
-    def left_link?; true; end
-    def left_link_name; "Mealbooks"; end
-    def left_link_url; "/"; end
-    def right_link?; true; end
-    def right_link_url
+    def home; "Mealbooks"; end
+    def home_url; "/"; end
+    def new_meal_url
       new_mealbook_meal_path(mealbook)
+    end
+    def grocery_list_url
+      mealbook_grocery_list_path(
+        mealbook,
+        start_date: mealbook.beginning_of_week,
+        end_date: mealbook.end_of_week,
+      )
+    end
+    def template
+      "/layouts/mealbook_nav"
     end
   end
 

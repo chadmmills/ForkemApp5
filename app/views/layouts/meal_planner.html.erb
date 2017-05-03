@@ -4,10 +4,9 @@
   <body>
     <%= render "layouts/flash" %>
     <div class="content flex flex-column">
-      <%= render(
-        "layouts/meal_planner_nav",
-        planner_nav: PlannerNav.for(controller_action, mealbook)
-      ) %>
+      <% PlannerNav.for(controller_action, mealbook).tap do |nav| %>
+        <%= render nav.template, planner_nav: nav %>
+      <% end %>
       <main class="main flex flex-auto ht1">
         <%= yield %>
       </main>

@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
   resources :mealbooks do
     resources :meals, only: :new
+    resource :grocery_list, only: :show
   end
   resources :meals
   resources :meal_assignments, path: "meal-assignments"

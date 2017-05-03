@@ -1,0 +1,12 @@
+HELLO
+
+<%= raw ap grocery_list %>
+<script>
+  window.groceryList = {
+    ingredients: <%= raw grocery_list.to_json %>,
+  }
+</script>
+
+<div id="grocery-list">
+
+</div>
