@@ -19,6 +19,13 @@ module PlannerNav
     def new_meal_url
       new_mealbook_meal_path(mealbook)
     end
+    def grocery_list_url
+      mealbook_grocery_list_path(
+        mealbook,
+        start_date: mealbook.beginning_of_week,
+        end_date: mealbook.end_of_week,
+      )
+    end
     def template
       "/layouts/mealbook_nav"
     end

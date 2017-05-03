@@ -15,6 +15,7 @@
 //= require vue
 //= require meal
 //= require mealAssignment
+//= require groceryList
 
 // NO //= require jquery //= require jquery_ujs
 // NO //= require touch_dnd_shim

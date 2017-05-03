@@ -8,7 +8,10 @@ class MealbookPlanner
     @current_date = current_date
   end
 
-  delegate :to_param, to: :mealbook
+  delegate :to_param,
+    :to_model,
+    :id,
+    to: :mealbook
 
   def as_json(args)
     {
