@@ -1,9 +1,0 @@
-%nav.flex.items-center.ht4
-  %h3.pl2
-    - if planner_nav.left_link?
-      = link_to planner_nav.left_link_name, planner_nav.left_link_url, class: "normal"
-  %section.flex-1.center
-    = planner_nav.name
-  %section.w4.flex-center
-    - if planner_nav.right_link?
-      = link_to raw("&#43;"), planner_nav.right_link_url, class: "flex-center box2 circle bg-green c-white normal"
