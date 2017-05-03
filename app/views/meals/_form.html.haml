@@ -26,11 +26,10 @@
     = render "/shared/box" do
       %h2.center Ingredients
       .flex-center.ht3
-        %div{"v-on:click": "showParseableTextField = true" }
-          Paste
+        %button{"@click.prevent": "showParseableTextField = true" } Paste Ingredients
       %div{ "v-show": "showParseableTextField" }
         .relative
-          .absolute-center.mx4
+          .absolute-center.border.mx4
             .p2.bg-white
               %textarea.textarea{ "v-model": "parseableIngredientText" }
               .flex.justify-between
@@ -40,9 +39,9 @@
                 %button{ "@click.prevent": "showParseableTextField = false"} Cancel
       %div
         .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients" }
-          %input.input.inline.flex-15{ "v-model": "ingredient.quantity" }
-          %input.input.inline.flex-15{ "v-model": "ingredient.measurement_unit" }
-          %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
+          %input.input.inline.flex-15{ "v-model": "ingredient.quantity", placeholder: "1" }
+          %input.input.inline.flex-15{ "v-model": "ingredient.measurement_unit", placeholder: "LB" }
+          %input{ "v-model": "ingredient.name", class: "input inline flex-50", placeholder: "Some Ingredient" }
           %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)" }
             &times
         = f.button "Add", "v-on:click.prevent": "addIngredient"
