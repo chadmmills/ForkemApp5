@@ -1,4 +1,4 @@
-= form_for meal do |f|
+= form_for meal, html: { autocomplete: "off" } do |f|
   .flex.pt2.px3
     = render "/shared/box" do
       %h2 Meal
@@ -24,14 +24,24 @@
     .p2
 
     = render "/shared/box" do
-      %h2 Ingredients
-      .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients" }
-        %input.input.inline.flex-15{ "v-model": "ingredient.quantity" }
-        .select.flex-15
-          = select_tag :measurement_unit,
-            options_for_select( ["TSP", "TSB", "Oz"]),
-            "v-model": "ingredient.measurement_unit"
-        %input{ "v-model": "ingredient.name", class: "input inline flex-50" }
-        %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)" }
-          &times
-      = f.button "Add", "v-on:click.prevent": "addIngredient"
+      %h2.center Ingredients
+      .flex-center.ht3
+        %button{"@click.prevent": "showParseableTextField = true" } Paste Ingredients
+      %div{ "v-show": "showParseableTextField" }
+        .relative
+          .absolute-center.border.mx4
+            .p2.bg-white
+              %textarea.textarea{ "v-model": "parseableIngredientText" }
+              .flex.justify-between
+                .pr1
+                  %button{ "@click.prevent": "parseText"} Parse
+                  %span.c-green.pl1{ "v-show": "showParsedSuccessMsg" } Done &#10003;
+                %button{ "@click.prevent": "showParseableTextField = false"} Cancel
+      %div
+        .meal-ingredients__item.flex.justify-between.mb2{ "v-for": "ingredient in visibleIngredients" }
+          %input.input.inline.flex-15{ "v-model": "ingredient.quantity", placeholder: "1" }
+          %input.input.inline.flex-15{ "v-model": "ingredient.measurement_unit", placeholder: "LB" }
+          %input{ "v-model": "ingredient.name", class: "input inline flex-50", placeholder: "Some Ingredient" }
+          %span.flex-5.center.cursor{ "v-on:click": "removeIngredient(ingredient)" }
+            &times
+        = f.button "Add", "v-on:click.prevent": "addIngredient"
