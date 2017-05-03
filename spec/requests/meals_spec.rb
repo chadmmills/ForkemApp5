@@ -34,6 +34,24 @@ RSpec.describe "Meals" do
         post '/meals', params: params
       end.to change(Ingredient, :count).by 2
     end
+
+    it "should only attempt to created ingredients that aren't deleted" do
+      mealbook_id = create(:mealbook).id
+      params = {
+        'meal' => {
+          'name' => 'Updated Name',
+          'desc' => '### Test',
+          'mealbook_id' => mealbook_id,
+          'ingredients' => [
+            { id: '12345678', name: '', measurement_unit: '', quantity: '', _delete: true },
+            { name: 'Pepper', measurement_unit: 'TSP', quantity: '1' },
+          ],
+        },
+      }
+      expect do
+        post '/meals', params: params
+      end.to change(Ingredient, :count).by 1
+    end
   end
 
   describe 'updating a meal' do

@@ -123,6 +123,10 @@ class MealsController < ApplicationController
       @ingredient = ingredient
     end
 
+    def valid?
+      true
+    end
+
     def save!
       ingredient.destroy!
     end

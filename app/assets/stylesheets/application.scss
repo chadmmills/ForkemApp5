@@ -4,7 +4,6 @@
 
 // http://www.color-hex.com/color/29302e
 $black: #5A585C;
-
 $gray: #F1F1F1;
 $dark-gray: #7e8281;
 $white: #fff;
@@ -15,9 +14,15 @@ $green: #76cda4;
   UTILITIES
 ******************************************************************************/
 
+.absolute-center {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
 .bg-green { background-color: $green; }
 .bg-grey { background-color: $gray; }
 .bg-white { background-color: $white; }
+.border { border-color: $gray; }
 .border-dashed { border: 1px dashed #bbb; }
 .box1 { height: 1rem; width: 1rem; }
 .box2 { height: 2rem; width: 2rem; }
@@ -63,6 +68,7 @@ $green: #76cda4;
 .w2 { width: 2rem }
 .w3 { width: 3rem }
 .w4 { width: 4rem }
+// Change this to .fit
 .w100 { width: 100%; }
 
 
@@ -148,6 +154,7 @@ label {
 
 .textarea {
   min-height: 6rem;
+  padding: .5rem;
 }
 
 /******************************************************************************

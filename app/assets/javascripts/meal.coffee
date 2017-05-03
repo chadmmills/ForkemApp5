@@ -4,7 +4,7 @@ document.addEventListener "turbolinks:load", ->
       el: "#mealForm"
       data:
         activeTab: 'write'
-        activeIngTab: 'list' # list || paste
+        showParseableTextField: false
         generatedHTML: ""
         meal: window._currentMeal
         parseableIngredientText: ""
@@ -20,9 +20,8 @@ document.addEventListener "turbolinks:load", ->
         clearParsedIngredients: () ->
           @showParsedSuccessMsg = false
           @parseableIngredientText = ""
-          @activeIngTab = 'list'
+          @showParseableTextField = false
         parseText: () ->
-          console.log(@parseableIngredientText)
           Axios.post("/parsed-ingredients", { text: @parseableIngredientText })
             .then (resp) =>
               @meal.ingredients = @meal.ingredients.concat(resp.data.ingredients)
