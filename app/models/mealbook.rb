@@ -28,7 +28,7 @@ class Mealbook < ApplicationRecord
   def meals_assigned_within_range(date_range)
     meals.joins(:meal_assignments).
       select("meals.*, meal_assignments.id AS assignment_id").
-      select("meal_assignments.assigned_on").
+      select("meal_assignments.assigned_on, meal_assignments.position").
       where(meal_assignments: { assigned_on: date_range }).
       order("meal_assignments.assigned_on, meal_assignments.created_at").
       to_a

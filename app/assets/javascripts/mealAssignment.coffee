@@ -19,12 +19,14 @@ Vue.component 'weekday-meal',
           <svg fill="currentColor" viewBox="0 0 20 20"><polygon points="10 15 4.122 18.09 5.245 11.545 .489 6.91 7.061 5.955 10 0 12.939 5.955 19.511 6.91 14.755 11.545 15.878 18.09"/></svg>
         </div>
         <div v-bind:class="{'flex-25 pr2 flex-center flex-column': !verticalLayout}" >
-          <h4 class="center mt1 mb0">{{ weekday.table.title }}</h4>
-          <h6 class="center mt0 mb2">{{ weekday.table.date }}</h6>
+          <h4 class="center mt1 mb0">{{ weekday.title }}</h4>
+          <h6 class="center mt0 mb2">{{ weekday.date }}</h6>
         </div>
-        <div v-for="(meal, index) in meals" class="bg-grey flex-center p1 rounded relative" :class="{ 'flex-15 mb2': verticalLayout, 'flex-25 ml1': !verticalLayout }">
-          <span class="top-right box2 flex-center cursor" @click="removeAssignment(meal)">&times</span>
-          <h5 class="center m0">{{ meal.name }}</h5>
+        <div v-for="(meal, index) in meals" v-if="meal" class="bg-grey flex-center p1 rounded relative" :class="{ 'flex-15 mb2': verticalLayout, 'flex-25 ml1': !verticalLayout }">
+          <div v-if="meal">
+            <span class="top-right box2 flex-center cursor" @click="removeAssignment(meal)">&times</span>
+            <h5 class="center m0">{{ meal.name }}</h5>
+          </div>
         </div>
         <div
           v-on:dragover="draggingOver"
@@ -44,11 +46,11 @@ Vue.component 'weekday-meal',
     isDraggingOver: false
     isLoading: false
   computed:
-    meals: -> @weekday.table.meals
+    meals: -> @weekday.meals
     mealIsAbleToBeDropped: -> @mealIsBeingDragged && (@meals.length < 3)
     isToday: ->
       todaysDate = new Date()
-      mealDate = new Date(@weekday.table.date)
+      mealDate = new Date(@weekday.date)
       "#{todaysDate.getUTCDate()} - #{todaysDate.getUTCMonth()}" is
         "#{mealDate.getUTCDate()} - #{mealDate.getUTCMonth()}"
   methods:
@@ -65,7 +67,7 @@ Vue.component 'weekday-meal',
       evt.preventDefault()
       @isLoading = true
       Axios.post "/meal-assignments", {
-        weekdate: @weekday.table.date
+        weekdate: @weekday.date
         meal_id: evt.dataTransfer.getData("text")
       }
       .then (resp) =>

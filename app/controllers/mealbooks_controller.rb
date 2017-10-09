@@ -38,6 +38,7 @@ class MealbooksController < ApplicationController
   def mealbook
     MealbookPlanner.new(mealbook: Mealbook.find(params[:id]), current_date: weekday)
   end
+  helper_method :mealbook
 
   def mealbook_params
     params.require(:mealbook).permit(:name)

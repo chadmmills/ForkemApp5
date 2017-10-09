@@ -10,6 +10,7 @@ RSpec.describe "Meal Day Assignments" do
 
       params = {
         meal_id: meal.id,
+        position: 1,
         weekdate: assignment_date.to_s
       }
 

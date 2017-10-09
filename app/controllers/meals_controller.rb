@@ -11,6 +11,7 @@ class MealsController < ApplicationController
   end
 
   def new
+    @mealbook = Mealbook.find(params[:mealbook_id])
     render locals: { mealbook: Mealbook.find(params[:mealbook_id]) }
   end
 

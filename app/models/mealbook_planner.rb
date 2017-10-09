@@ -41,6 +41,10 @@ class MealbookPlanner
 
   def meals
     mealbook.meals.select(:id, :name)
+    # [
+    #   { id: 'asldkfj', name: 'First' },
+    #   { id: 'qweaslfj', name: 'Last' },
+    # ]
   end
 
   def assigned_meals
@@ -53,12 +57,18 @@ class MealbookPlanner
 
   def weekdays
     week_range.map do |dateObj|
-      OpenStruct.new(
-        title: dateObj.strftime("%A"),
-        date: dateObj.to_s,
-        meals: assigned_meals.select { |m| m.assigned_on == dateObj }
+      current_day_meals = assigned_meals.select { |m| m.assigned_on == dateObj }
+      meals_by_meal_type = [ 0, 1, 2 ].map do |day_position|
+        current_day_meals.detect { |meal| meal.position == day_position }
+      end
+      Weekday.new(
+        dateObj.strftime("%A"),
+        dateObj.to_s,
+        meals_by_meal_type,
       )
     end
   end
+
+  Weekday = Struct.new(:title, :date, :meals)
 
 end

@@ -20,6 +20,13 @@ Rails.application.routes.draw do
   get "/create-account" => "clearance/users#new", as: "sign_up"
   #############################################################################
 
+  scope '/api' do
+    defaults format: :json do
+      resources :planners
+      resources :meal_assignments, path: "meal-assignments"
+    end
+  end
+  resources :planners
   resources :mealbooks do
     resources :meals, only: :new
   end

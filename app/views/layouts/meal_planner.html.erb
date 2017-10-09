@@ -6,7 +6,7 @@
     <div class="content flex flex-column">
       <%= render(
         "layouts/meal_planner_nav",
-        planner_nav: PlannerNav.for(controller_action, mealbook)
+        planner_nav: PlannerNav.for(controller_action)
       ) %>
       <main class="main flex flex-auto ht1">
         <%= yield %>

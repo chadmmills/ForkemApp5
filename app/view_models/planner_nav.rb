@@ -25,7 +25,7 @@ module PlannerNav
     end
   end
 
-  def self.for(path, mealbook)
+  def self.for(path, mealbook = Mealbook.first)
     (planner_navs[path] || DefaultNav).new(mealbook)
   end
 

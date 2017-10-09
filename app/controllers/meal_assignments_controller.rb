@@ -1,8 +1,11 @@
 class MealAssignmentsController < ApplicationController
+  protect_from_forgery with: :null_session
+
   def create
     mealbook = Mealbook.find_mealbook_for_meal_id(params[:meal_id])
     meal_assigner = MealAssigner.new(
       mealbook_assignment: mealbook,
+      position: params[:position],
       assignment_date: params[:weekdate],
     )
 
