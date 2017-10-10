@@ -52,6 +52,14 @@ $green: #76cda4;
 .ht6 { height: 6rem }
 .ht7 { height: 7rem }
 .ht8 { height: 8rem }
+.hover {
+  &:hover {
+    .hover-reveal-flex {
+      display: flex;
+    }
+  }
+}
+.hover-reveal-flex { display: none; }
 .icon { height: 20px; width: 20px; }
 .lnht1 { line-height: 1rem; }
 .lnht2 { line-height: 2rem; }

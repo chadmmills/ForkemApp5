@@ -25,7 +25,8 @@ type alias Meal =
 
 
 type alias AssignedMeal =
-    { id : String
+    { assignmentId : String
+    , id : String
     , name : String
     , position : Int
     }
@@ -78,6 +79,21 @@ fetchPlanner : Cmd Message
 fetchPlanner =
     Http.send LoadedPlanner
         (Http.get "/api/planners" plannerDecoder)
+
+
+destroyAssignedMeal : String -> Cmd Message
+destroyAssignedMeal assignmentId =
+    Http.send LoadedPlanner
+        (Http.request
+            { method = "DELETE"
+            , headers = []
+            , url = "/api/meal-assignments/" ++ assignmentId
+            , body = Http.emptyBody
+            , expect = Http.expectJson plannerDecoder
+            , timeout = Nothing
+            , withCredentials = False
+            }
+        )
 
 
 postAssignedMeal : Maybe String -> Maybe String -> Int -> String -> Cmd Message
@@ -141,7 +157,8 @@ weekdayMealsDecoder =
         (Decode.oneOf
             [ Decode.null (Unassigned {})
             , Decode.map Assigned <|
-                Decode.map3 AssignedMeal
+                Decode.map4 AssignedMeal
+                    (Decode.field "assignment_id" Decode.string)
                     (Decode.field "id" Decode.string)
                     (Decode.field "name" Decode.string)
                     (Decode.field "position" Decode.int)
@@ -170,7 +187,7 @@ view model =
     div [ class "flex flex-column vh-100" ]
         [ nav [ class "flex items-center ht4" ] [ text "Header" ]
         , div [ class "flex flex-auto main" ]
-            [ div [ class "bg-light-gray flex-auto p2 scroll-y" ]
+            [ div [ class "bg-light-gray flex-auto px1 py2 scroll-y" ]
                 [ div [ class "weekday-meals px1 pb2 flex flex-column flex-1" ]
                     (List.map (weekdayDayListDay model.isDraggingMealId) model.weekdayAssignments)
                 ]
@@ -200,7 +217,10 @@ weekdayDayListDay : Maybe String -> Weekday -> Html Message
 weekdayDayListDay mealId weekday =
     div [ class "weekday bg-white flex flex-auto ht8 p1 mb2 relative rounded" ]
         [ div [ class "flex flex-auto" ]
-            [ h3 [ class "font1 ma0 w6" ] [ text weekday.title ]
+            [ div [ class "flex flex-column flex-center w6" ]
+                [ h4 [ class "font1 ma0" ] [ text weekday.title ]
+                , h6 [] [ text weekday.date ]
+                ]
             , div
                 [ class "flex-auto flex" ]
                 (List.indexedMap
@@ -215,8 +235,14 @@ weekdayAssignment : Weekday -> Int -> WeekdayMeal -> Html Message
 weekdayAssignment weekday position meal =
     case meal of
         Assigned assignedMeal ->
-            div [ class "bg-grey flex flex-33 ml2 p1 rounded relative" ]
-                [ h5 [ class "m-auto" ] [ text assignedMeal.name ] ]
+            div [ class "bg-grey flex flex-33 hover ml2 p1 rounded relative" ]
+                [ div
+                    [ class "box2 cursor flex-center hover-reveal-flex top-right"
+                    , onClick (RemoveAssignment assignedMeal.assignmentId)
+                    ]
+                    [ text "×" ]
+                , h5 [ class "m-auto" ] [ text assignedMeal.name ]
+                ]
 
         Unassigned _ ->
             div
@@ -295,11 +321,12 @@ onEnter msg =
 type Message
     = None
     | AddNewMeal
+    | EndDraggingMeal
     | LoadedPlanner (Result Http.Error Planner)
     | MealDropped Int String
     | MealEnteredWeekday String
+    | RemoveAssignment String
     | StartDraggingMeal String
-    | EndDraggingMeal
     | UpdateNewMealText String
 
 
@@ -356,6 +383,9 @@ update message model =
         LoadedPlanner (Err _) ->
             Debug.log "Error Loading Planner"
                 ( { model | isLoadingMeals = False }, Cmd.none )
+
+        RemoveAssignment assignmentId ->
+            ( model, destroyAssignedMeal assignmentId )
 
 
 
