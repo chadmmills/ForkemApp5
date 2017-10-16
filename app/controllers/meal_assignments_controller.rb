@@ -14,7 +14,7 @@ class MealAssignmentsController < ApplicationController
         params: params,
         mealbook: MealbookPlanner.new(
           mealbook: Meal.find(params[:meal_id]).mealbook,
-          current_date: Date.parse(params[:weekdate]).beginning_of_week
+          current_week_date: Date.parse(params[:weekdate])
         )
       }
     else

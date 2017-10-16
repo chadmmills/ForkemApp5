@@ -1,1 +1,7 @@
+<script>
+  window.__mealbookId = "<%= mealbook.id%>"
+  window.__currentWeekDate = "<%= mealbook.current_date %>"
+  window.__prevWeekDate = "<%= mealbook.prev_week %>"
+</script>
+
 <%= javascript_pack_tag 'planner' %>

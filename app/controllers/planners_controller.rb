@@ -19,7 +19,9 @@ class PlannersController < ApplicationController
   private
 
   def mealbook
-    MealbookPlanner.new(mealbook: Mealbook.first, current_date: weekday)
+    MealbookPlanner.new(mealbook: Mealbook.find(params[:id]),
+                        current_date: Date.today,
+                        current_week_date: weekday)
   end
   helper_method :mealbook
 

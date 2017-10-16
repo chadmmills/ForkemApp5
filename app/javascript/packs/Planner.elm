@@ -3,7 +3,7 @@ module Planner exposing (..)
 import Http
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (class, draggable, placeholder, value)
+import Html.Attributes exposing (class, classList, draggable, href, placeholder, value)
 import Json.Decode as Decode
 import Json.Encode as Encode
 
@@ -12,8 +12,11 @@ import Json.Encode as Encode
 
 
 type alias Planner =
-    { id : String
+    { currentWeekDateLabel : String
+    , id : String
     , meals : List Meal
+    , nextWeekDate : String
+    , prevWeekDate : String
     , weekdays : List Weekday
     }
 
@@ -33,7 +36,7 @@ type alias AssignedMeal =
 
 
 type alias UnassignedMeal =
-    {}
+    { mealType : String }
 
 
 type WeekdayMeal
@@ -49,12 +52,26 @@ type alias Weekday =
 
 
 type alias Model =
-    { isLoadingMeals : Bool
+    { appError : Maybe String
+    , csrfToken : String
+    , currentWeekDate : String
+    , currentWeekDateLabel : String
+    , isLoadingMeals : Bool
     , isDraggingMealId : Maybe String
-    , mealbookId : Maybe String
+    , mealbookId : String
     , meals : List Meal
     , newMealText : String
+    , nextWeekDate : String
+    , prevWeekDate : String
     , weekdayAssignments : List Weekday
+    }
+
+
+type alias Flags =
+    { csrfToken : String
+    , currentWeekDate : String
+    , mealbookId : String
+    , prevWeekDate : String
     }
 
 
@@ -62,23 +79,33 @@ type alias Model =
 -- INIT
 
 
-init : ( Model, Cmd Message )
-init =
-    ( { isLoadingMeals = True
-      , isDraggingMealId = Just "FakeId"
+init : Flags -> ( Model, Cmd Message )
+init flags =
+    ( { appError = Nothing
+      , csrfToken = flags.csrfToken
+      , currentWeekDate = flags.currentWeekDate
+      , currentWeekDateLabel = ""
+      , isLoadingMeals = True
+      , isDraggingMealId = Nothing
       , newMealText = ""
-      , mealbookId = Nothing
+      , mealbookId = flags.mealbookId
       , meals = []
+      , nextWeekDate = ""
+      , prevWeekDate = ""
       , weekdayAssignments = []
       }
-    , fetchPlanner
+    , fetchPlanner flags.mealbookId flags.currentWeekDate
     )
 
 
-fetchPlanner : Cmd Message
-fetchPlanner =
-    Http.send LoadedPlanner
-        (Http.get "/api/planners" plannerDecoder)
+fetchPlanner : String -> String -> Cmd Message
+fetchPlanner mealbookId weekDate =
+    let
+        urlString =
+            "/api/planners/" ++ mealbookId ++ "?weekdate=" ++ weekDate
+    in
+        Http.send LoadedPlanner
+            (Http.get urlString plannerDecoder)
 
 
 destroyAssignedMeal : String -> Cmd Message
@@ -96,7 +123,7 @@ destroyAssignedMeal assignmentId =
         )
 
 
-postAssignedMeal : Maybe String -> Maybe String -> Int -> String -> Cmd Message
+postAssignedMeal : Maybe String -> String -> Int -> String -> Cmd Message
 postAssignedMeal mealId mealbookId position date =
     let
         mealIdString =
@@ -106,14 +133,6 @@ postAssignedMeal mealId mealbookId position date =
 
                 Just mealId ->
                     mealId
-
-        mealbookIdString =
-            case mealbookId of
-                Nothing ->
-                    ""
-
-                Just mealbookId ->
-                    mealbookId
     in
         Http.send LoadedPlanner
             (Http.post
@@ -121,7 +140,7 @@ postAssignedMeal mealId mealbookId position date =
                 (Http.jsonBody
                     (Encode.object
                         [ ( "meal_id", Encode.string mealIdString )
-                        , ( "mealbook_id", Encode.string mealbookIdString )
+                        , ( "mealbook_id", Encode.string mealbookId )
                         , ( "weekdate", Encode.string date )
                         , ( "position", Encode.int position )
                         ]
@@ -134,9 +153,12 @@ postAssignedMeal mealId mealbookId position date =
 plannerDecoder : Decode.Decoder Planner
 plannerDecoder =
     Decode.field "mealbook"
-        (Decode.map3 Planner
+        (Decode.map6 Planner
+            (Decode.field "current_date_short" Decode.string)
             (Decode.field "id" Decode.string)
             (Decode.field "meals" mealsDecoder)
+            (Decode.field "next_week" Decode.string)
+            (Decode.field "prev_week" Decode.string)
             (Decode.field "weekdays" weekdaysDecoder)
         )
 
@@ -155,7 +177,9 @@ weekdayMealsDecoder : Decode.Decoder (List WeekdayMeal)
 weekdayMealsDecoder =
     Decode.list
         (Decode.oneOf
-            [ Decode.null (Unassigned {})
+            [ Decode.map Unassigned <|
+                Decode.map UnassignedMeal
+                    (Decode.field "mealType" Decode.string)
             , Decode.map Assigned <|
                 Decode.map4 AssignedMeal
                     (Decode.field "assignment_id" Decode.string)
@@ -185,37 +209,70 @@ mealDecoder =
 view : Model -> Html Message
 view model =
     div [ class "flex flex-column vh-100" ]
-        [ nav [ class "flex items-center ht4" ] [ text "Header" ]
+        [ navigationHeader model
         , div [ class "flex flex-auto main" ]
-            [ div [ class "bg-light-gray flex-auto px1 py2 scroll-y" ]
-                [ div [ class "weekday-meals px1 pb2 flex flex-column flex-1" ]
-                    (List.map (weekdayDayListDay model.isDraggingMealId) model.weekdayAssignments)
+            [ div [ class "bg-light-gray flex flex-column flex-auto px1 scroll-y" ]
+                [ section [ class "flex flex-center ht4" ]
+                    [ div
+                        [ class "box1 chevron-circle-left cursor"
+                        , onClick (LoadPlanner model.prevWeekDate)
+                        ]
+                        []
+                    , div [ class "px1" ] [ text model.currentWeekDateLabel ]
+                    , div
+                        [ class "box1 chevron-circle-right cursor"
+                        , onClick (LoadPlanner model.nextWeekDate)
+                        ]
+                        []
+                    ]
+                , div [ class "weekday-meals px1 pb2 flex flex-column flex-1" ]
+                    (case model.appError of
+                        Nothing ->
+                            (List.map (weekdayDayListDay model.isDraggingMealId) model.weekdayAssignments)
+
+                        Just error ->
+                            [ text error ]
+                    )
                 ]
             , div [ class "main-meals pa2 w5" ]
                 [ input
-                    [ placeholder "Enter New Meal"
+                    [ class "input"
+                    , placeholder "Enter New Meal"
                     , value model.newMealText
                     , onEnter AddNewMeal
                     , onInput UpdateNewMealText
                     ]
                     []
-                , div [] [ text "Planner Meals" ]
                 , div []
                     [ if model.isLoadingMeals then
                         div [] [ text "Is Loading" ]
                       else
                         div [] [ text "" ]
                     ]
-                , div []
+                , div [ class "py1" ]
                     (List.map mealListMeal model.meals)
                 ]
             ]
         ]
 
 
+navigationHeader : Model -> Html Message
+navigationHeader model =
+    nav [ class "flex items-center ht4 px2" ]
+        [ h3 []
+            [ a [ class "normal", href "/" ] [ text "Mealbook Planners" ] ]
+        , span [ class "m-auto" ] [ text "Header" ]
+        , a
+            [ class "flex-center box2 circle bg-green c-white normal"
+            , href ("/mealbooks/" ++ model.mealbookId ++ "/meals/new")
+            ]
+            [ text "+" ]
+        ]
+
+
 weekdayDayListDay : Maybe String -> Weekday -> Html Message
 weekdayDayListDay mealId weekday =
-    div [ class "weekday bg-white flex flex-auto ht8 p1 mb2 relative rounded" ]
+    div [ class "weekday bg-white flex flex-auto m-ht5 p1 mb2 relative rounded" ]
         [ div [ class "flex flex-auto" ]
             [ div [ class "flex flex-column flex-center w6" ]
                 [ h4 [ class "font1 ma0" ] [ text weekday.title ]
@@ -224,15 +281,15 @@ weekdayDayListDay mealId weekday =
             , div
                 [ class "flex-auto flex" ]
                 (List.indexedMap
-                    (weekdayAssignment weekday)
+                    (weekdayAssignment mealId weekday)
                     weekday.meals
                 )
             ]
         ]
 
 
-weekdayAssignment : Weekday -> Int -> WeekdayMeal -> Html Message
-weekdayAssignment weekday position meal =
+weekdayAssignment : Maybe String -> Weekday -> Int -> WeekdayMeal -> Html Message
+weekdayAssignment draggingMealId weekday position meal =
     case meal of
         Assigned assignedMeal ->
             div [ class "bg-grey flex flex-33 hover ml2 p1 rounded relative" ]
@@ -244,14 +301,32 @@ weekdayAssignment weekday position meal =
                 , h5 [ class "m-auto" ] [ text assignedMeal.name ]
                 ]
 
-        Unassigned _ ->
-            div
-                [ class "border-dashed flex-33 flex-auto ml2"
-                , onDragEnter (MealEnteredWeekday weekday.date)
-                , onDragOver
-                , onDrop (MealDropped position weekday.date)
-                ]
-                []
+        Unassigned emptyAssignment ->
+            let
+                isDraggingMeal =
+                    case draggingMealId of
+                        Nothing ->
+                            False
+
+                        Just _ ->
+                            True
+            in
+                div
+                    [ classList
+                        [ ( "flex flex-33 flex-auto ml2", True )
+                        , ( "border-dashed", isDraggingMeal )
+                        ]
+                    , onDragEnter (MealEnteredWeekday weekday.date)
+                    , onDragOver
+                    , onDrop (MealDropped position weekday.date)
+                    ]
+                    [ span [ class "font0875 m-auto" ]
+                        [ if isDraggingMeal then
+                            text emptyAssignment.mealType
+                          else
+                            text ""
+                        ]
+                    ]
 
 
 mealListMeal : Meal -> Html Message
@@ -260,7 +335,7 @@ mealListMeal meal =
         [ draggable "true"
         , onDragStart (StartDraggingMeal meal.id)
         , onDragEnd EndDraggingMeal
-        , class "flex bg-white ht4 items-center justify-between mb1 p1 rounded"
+        , class "flex bg-white font0875 hand ht4 items-center justify-between mb1 p1 rounded"
         ]
         [ text meal.name ]
 
@@ -322,6 +397,7 @@ type Message
     = None
     | AddNewMeal
     | EndDraggingMeal
+    | LoadPlanner String
     | LoadedPlanner (Result Http.Error Planner)
     | MealDropped Int String
     | MealEnteredWeekday String
@@ -356,10 +432,7 @@ update message model =
             ( model, Cmd.none )
 
         MealDropped position date ->
-            Debug.log (toString position)
-                Debug.log
-                date
-                ( model, postAssignedMeal model.isDraggingMealId model.mealbookId position date )
+            ( model, postAssignedMeal model.isDraggingMealId model.mealbookId position date )
 
         StartDraggingMeal id ->
             ( { model | isDraggingMealId = Just id }, Cmd.none )
@@ -370,19 +443,28 @@ update message model =
         UpdateNewMealText text ->
             ( { model | newMealText = text }, Cmd.none )
 
+        LoadPlanner weekDate ->
+            ( model, fetchPlanner model.mealbookId weekDate )
+
         LoadedPlanner (Ok planner) ->
             ( { model
-                | isLoadingMeals = False
-                , mealbookId = Just planner.id
+                | currentWeekDateLabel = planner.currentWeekDateLabel
+                , isLoadingMeals = False
                 , meals = planner.meals
+                , nextWeekDate = planner.nextWeekDate
+                , prevWeekDate = planner.prevWeekDate
                 , weekdayAssignments = planner.weekdays
               }
             , Cmd.none
             )
 
         LoadedPlanner (Err _) ->
-            Debug.log "Error Loading Planner"
-                ( { model | isLoadingMeals = False }, Cmd.none )
+            ( { model
+                | isLoadingMeals = False
+                , appError = Just "Oops something went wrong, please refresh the page"
+              }
+            , Cmd.none
+            )
 
         RemoveAssignment assignmentId ->
             ( model, destroyAssignedMeal assignmentId )
@@ -401,9 +483,9 @@ subscriptions model =
 -- MAIN
 
 
-main : Program Never Model Message
+main : Program Flags Model Message
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

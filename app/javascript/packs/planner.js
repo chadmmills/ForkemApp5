@@ -3,9 +3,22 @@
 
 import Elm from './Planner'
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('turbolinks:load', () => {
+  const csrfToken = document.querySelectorAll('meta[name="csrf-token"]')[0].
+    getAttribute("content")
+
+  const currentWeekDate = window.__currentWeekDate
+  const mealbookId = window.__mealbookId
+  const prevWeekDate = window.__prevWeekDate
+
+  console.log(csrfToken)
   const target = document.createElement('div')
 
   document.body.appendChild(target)
-  Elm.Planner.embed(target)
+  Elm.Planner.embed(target, {
+    csrfToken,
+    currentWeekDate,
+    mealbookId,
+    prevWeekDate,
+  })
 })

@@ -44,6 +44,7 @@ $green: #76cda4;
 .font075 { font-size: .75rem; }
 .font0875 { font-size: .875rem; }
 .font1 { font-size: 1rem; }
+.hand:hover { cursor: move; }
 .ht1 { height: 1rem }
 .ht2 { height: 2rem }
 .ht3 { height: 3rem }
@@ -66,6 +67,14 @@ $green: #76cda4;
 .lnht3 { line-height: 3rem; }
 .lnht4 { line-height: 4rem; }
 .m-auto { margin: auto; }
+.m-ht1 { min-height: 1rem }
+.m-ht2 { min-height: 2rem }
+.m-ht3 { min-height: 3rem }
+.m-ht4 { min-height: 4rem }
+.m-ht5 { min-height: 5rem }
+.m-ht6 { min-height: 6rem }
+.m-ht7 { min-height: 7rem }
+.m-ht8 { min-height: 8rem }
 .normal { text-decoration: none; }
 .py1p5 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
 .relative { position: relative; }
@@ -171,6 +180,17 @@ label {
   min-height: 6rem;
   padding: .5rem;
   resize: vertical;
+}
+
+/******************************************************************************
+  SVG
+******************************************************************************/
+
+.chevron-circle-left {
+  background-image: image-url('cheveron-outline-left.svg');
+}
+.chevron-circle-right {
+  background-image: image-url('cheveron-outline-right.svg');
 }
 
 /******************************************************************************
