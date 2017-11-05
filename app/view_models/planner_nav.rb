@@ -8,7 +8,7 @@ module PlannerNav
   class DefaultNav < Default
     def left_link?; true; end
     def left_link_name; name; end
-    def left_link_url; mealbook; end
+    def left_link_url; planner_path(mealbook); end
     def right_link?; true; end
     def right_link_url
       new_mealbook_meal_path(mealbook)

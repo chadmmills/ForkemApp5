@@ -209,7 +209,7 @@ mealDecoder =
 view : Model -> Html Message
 view model =
     div [ class "flex flex-column vh-100" ]
-        [ navigationHeader model
+        [ navigationHeader model.mealbookId
         , div [ class "flex flex-auto main" ]
             [ div [ class "bg-light-gray flex flex-column flex-auto px1 scroll-y" ]
                 [ section [ class "flex flex-center ht4" ]
@@ -256,15 +256,17 @@ view model =
         ]
 
 
-navigationHeader : Model -> Html Message
-navigationHeader model =
+navigationHeader : String -> Html Message
+navigationHeader plannerId =
     nav [ class "flex items-center ht4 px2" ]
         [ h3 []
             [ a [ class "normal", href "/" ] [ text "Mealbook Planners" ] ]
         , span [ class "m-auto" ] [ text "Header" ]
+        , a [ href ("/planners/" ++ plannerId ++ "/grocery-list") ]
+            [ text "List" ]
         , a
             [ class "flex-center box2 circle bg-green c-white normal"
-            , href ("/mealbooks/" ++ model.mealbookId ++ "/meals/new")
+            , href ("/mealbooks/" ++ plannerId ++ "/meals/new")
             ]
             [ text "+" ]
         ]
@@ -488,6 +490,6 @@ main =
     Html.programWithFlags
         { init = init
         , view = view
-        , update = update
         , subscriptions = subscriptions
+        , update = update
         }

@@ -3,7 +3,9 @@
 
 import Elm from './Planner'
 
-document.addEventListener('turbolinks:load', () => {
+// document.addEventListener('turbolinks:load', () => {
+(function(){
+  console.log('planner pack turbo load')
   const csrfToken = document.querySelectorAll('meta[name="csrf-token"]')[0].
     getAttribute("content")
 
@@ -21,4 +23,4 @@ document.addEventListener('turbolinks:load', () => {
     mealbookId,
     prevWeekDate,
   })
-})
+})()

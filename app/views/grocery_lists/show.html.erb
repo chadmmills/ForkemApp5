@@ -1,0 +1,9 @@
+
+<script>
+  window.__plannerId = "<%= mealbook.id %>"
+  window.__initStartDate = "<%= mealbook.beginning_of_week %>"
+  window.__initEndDate = "<%= mealbook.end_of_week %>"
+</script>
+
+<div id="grocery-list"></div>
+<%= javascript_pack_tag 'grocery_list' %>
