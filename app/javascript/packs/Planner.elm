@@ -339,7 +339,9 @@ mealListMeal meal =
         , onDragEnd EndDraggingMeal
         , class "flex bg-white font0875 hand ht4 items-center justify-between mb1 p1 rounded"
         ]
-        [ text meal.name ]
+        [ text meal.name
+        , a [ href ("/meals/" ++ meal.id) ] [ text "pen" ]
+        ]
 
 
 isDragging : Maybe String -> Bool

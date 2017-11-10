@@ -8,6 +8,7 @@ import Html exposing (..)
 
 import Json.Decode as Decode
 import Date exposing (Date)
+import Date.Extra as DateFormat
 import DatePicker exposing (defaultSettings, DateEvent(..))
 
 
@@ -45,10 +46,20 @@ type alias GroceryListResponse =
 
 type alias Model =
     { ingredients : List Ingredient
-    , listStartDate : Maybe Date
-    , listEndDate : Maybe Date
+    , inputStartDate : Maybe Date
+    , inputEndDate : Maybe Date
+    , plannerId : String
+    , queryStartDate : Date
+    , queryEndDate : Date
     , startDatePicker : DatePicker.DatePicker
     , endDatePicker : DatePicker.DatePicker
+    }
+
+
+dateInputSettings : DatePicker.Settings
+dateInputSettings =
+    { defaultSettings
+        | inputClassList = [ ( "input inline", True ) ]
     }
 
 
@@ -75,37 +86,59 @@ update message model =
         SetEndDate msg ->
             let
                 ( newDatePicker, datePickerFx, event ) =
-                    DatePicker.update defaultSettings msg model.endDatePicker
+                    DatePicker.update dateInputSettings msg model.endDatePicker
+
+                ( newEndDate, newQueryEndDate, fetchCommand ) =
+                    case event of
+                        Changed formDate ->
+                            case formDate of
+                                Just date ->
+                                    ( formDate
+                                    , date
+                                    , fetchGroceryList model.plannerId model.queryStartDate date
+                                    )
+
+                                Nothing ->
+                                    ( formDate, model.queryEndDate, Cmd.none )
+
+                        NoChange ->
+                            ( model.inputEndDate, model.queryEndDate, Cmd.none )
             in
                 ( { model
-                    | listEndDate =
-                        case event of
-                            Changed date ->
-                                date
-
-                            NoChange ->
-                                model.listEndDate
+                    | inputEndDate = newEndDate
+                    , queryEndDate = newQueryEndDate
                     , endDatePicker = newDatePicker
                   }
-                , Cmd.none
+                , fetchCommand
                 )
 
         SetStartDate msg ->
             let
                 ( newDatePicker, datePickerFx, event ) =
-                    DatePicker.update defaultSettings msg model.startDatePicker
+                    DatePicker.update dateInputSettings msg model.startDatePicker
+
+                ( newStartDate, newQueryStartDate, fetchCommand ) =
+                    case event of
+                        Changed formDate ->
+                            case formDate of
+                                Just date ->
+                                    ( formDate
+                                    , date
+                                    , fetchGroceryList model.plannerId date model.queryEndDate
+                                    )
+
+                                Nothing ->
+                                    ( formDate, model.queryStartDate, Cmd.none )
+
+                        NoChange ->
+                            ( model.inputStartDate, model.queryStartDate, Cmd.none )
             in
                 ( { model
-                    | listStartDate =
-                        case event of
-                            Changed date ->
-                                date
-
-                            NoChange ->
-                                model.listStartDate
+                    | inputStartDate = newStartDate
+                    , queryStartDate = newQueryStartDate
                     , startDatePicker = newDatePicker
                   }
-                , Cmd.none
+                , fetchCommand
                 )
 
         None ->
@@ -114,16 +147,17 @@ update message model =
 
 view : Model -> Html Message
 view model =
-    section []
-        [ Html.header [ class "flex" ]
-            [ DatePicker.view model.listStartDate
-                defaultSettings
+    section [ class "bg-white rounded mt2 mx-auto mx-w-48 p1 w100" ]
+        [ Html.header [ class "flex items-center" ]
+            [ DatePicker.view model.inputStartDate
+                dateInputSettings
                 model.startDatePicker
                 |> Html.map SetStartDate
-            , DatePicker.view model.listEndDate
-                defaultSettings
+            , DatePicker.view model.inputEndDate
+                dateInputSettings
                 model.endDatePicker
                 |> Html.map SetEndDate
+            , button [] [ text "Create Grocery List" ]
             ]
         , ul []
             (List.map ingredientItem model.ingredients)
@@ -139,13 +173,17 @@ ingredientItem ingredient =
 -- COMMANDS
 
 
-fetchGroceryList : String -> Cmd Message
-fetchGroceryList plannerId =
+fetchGroceryList : String -> Date -> Date -> Cmd Message
+fetchGroceryList plannerId startDate endDate =
     let
         urlString =
             "/api/planners/"
                 ++ plannerId
                 ++ "/grocery-list"
+                ++ "?start_date="
+                ++ DateFormat.toIsoString startDate
+                ++ "&end_date="
+                ++ DateFormat.toIsoString endDate
     in
         Http.send LoadedGroceryList <|
             Http.get urlString groceryListDecoder
@@ -178,29 +216,27 @@ subscriptions model =
 
 
 -- MAIN
--- DatePicker.initFromDate (Date.fromString "1969-07-20" |> Result.toMaybe |> Maybe.withDefault (Date.fromTime 0))
 
 
 init : Flags -> ( Model, Cmd Message )
 init flags =
     let
-        -- ( startDatePicker, startDatePickerFx ) =
-        --     DatePicker.init
         startDate =
-            (Date.fromString flags.initStartDate |> Result.toMaybe |> Maybe.withDefault (Date.fromTime 0))
+            DateFormat.fromIsoString flags.initStartDate |> Maybe.withDefault (Date.fromTime 0)
 
         endDate =
-            (Date.fromString flags.initEndDate |> Result.toMaybe |> Maybe.withDefault (Date.fromTime 0))
+            DateFormat.fromIsoString flags.initEndDate |> Maybe.withDefault (Date.fromTime 0)
     in
         ( { ingredients = []
-          , listStartDate = Just startDate
-          , listEndDate = Just endDate
+          , inputStartDate = Just startDate
+          , inputEndDate = Just endDate
+          , plannerId = flags.plannerId
+          , queryStartDate = startDate
+          , queryEndDate = endDate
           , startDatePicker = DatePicker.initFromDate startDate
           , endDatePicker = DatePicker.initFromDate endDate
           }
-        , Cmd.batch
-            [ fetchGroceryList flags.plannerId
-            ]
+        , fetchGroceryList flags.plannerId startDate endDate
         )
 
 
