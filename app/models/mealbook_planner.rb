@@ -9,7 +9,7 @@ class MealbookPlanner
     @current_week_date = current_week_date.beginning_of_week(start_day = WEEK_START_DAY)
   end
 
-  delegate :id, :to_param, to: :mealbook
+  delegate :id, :to_param, :grocery_lists, to: :mealbook
 
   def as_json(args)
     {

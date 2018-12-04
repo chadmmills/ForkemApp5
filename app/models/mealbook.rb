@@ -2,6 +2,7 @@ class Mealbook < ApplicationRecord
   has_many :meals #on_delete :cascade
   has_many :mealbook_users
   has_many :users, through: :mealbook_users
+  has_many :grocery_lists
 
   class << self
     def find_mealbook_for_meal_id(meal_id)

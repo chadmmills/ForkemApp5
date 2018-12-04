@@ -4,6 +4,7 @@ import Elm from './GroceryList'
 (function(){
   const csrfToken = document.querySelectorAll('meta[name="csrf-token"]')[0].
     getAttribute("content")
+  const listId = window.__listId
   const plannerId = window.__plannerId
   const initStartDate = window.__initStartDate
   const initEndDate = window.__initEndDate
@@ -13,6 +14,7 @@ import Elm from './GroceryList'
       csrfToken,
       initEndDate,
       initStartDate,
+      listId,
       plannerId
     }
   )

@@ -21,19 +21,21 @@ Rails.application.routes.draw do
   #############################################################################
 
   resources :planners do
-    resource :grocery_list, only: :show, path: "grocery-list"
+    resources :grocery_lists, only: [:create, :new, :show], path: "grocery-lists"
+  end
+  resources :mealbooks do
+    resources :meals, only: :new
   end
 
   scope '/api' do
     defaults format: :json do
+      resources :mealbooks, only: :index
+      resources :grocery_list_items, path: "grocery-list-items"
       resources :meal_assignments, path: "meal-assignments"
       resources :planners do
-        resource :grocery_list, only: :show, path: "grocery-list"
+        resources :grocery_lists, only: [:index, :new, :show, :destroy], path: "grocery-lists"
       end
     end
-  end
-  resources :mealbooks do
-    resources :meals, only: :new
   end
   resources :meals
   resources :meal_assignments, path: "meal-assignments"

@@ -2,11 +2,14 @@ module GroceryList exposing (..)
 
 import Http exposing (..)
 import Html exposing (..)
+import Html.Events exposing (..)
+import Html.Keyed as Keyed
 
 
 -- import Html.Attributes exposing (..)
 
 import Json.Decode as Decode
+import Json.Encode as Encode
 import Date exposing (Date)
 import Date.Extra as DateFormat
 import DatePicker exposing (defaultSettings, DateEvent(..))
@@ -14,18 +17,26 @@ import DatePicker exposing (defaultSettings, DateEvent(..))
 
 -- import Html.Events exposing (..)
 
-import Html.Attributes exposing (class, classList, href, placeholder, value)
+import Html.Attributes exposing (action, class, classList, href, method, name, placeholder, value)
 
 
 type alias Flags =
     { csrfToken : String
     , initEndDate : String
     , initStartDate : String
+    , listId : Maybe String
     , plannerId : String
     }
 
 
 type alias Ingredient =
+    { isCompleted : Bool
+    , id : String
+    , name : String
+    }
+
+
+type alias IngredientListItem =
     { name : String
     }
 
@@ -34,20 +45,53 @@ type alias Mealbook =
     { id : String }
 
 
+type CurrentGroceryList
+    = NewGroceryList
+    | LoadingGroceryList GroceryList
+    | LoadedGroceryList GroceryListResponse
+
+
 type alias GroceryList =
-    { id : String }
+    { id : String
+    , name : String
+    }
 
 
-type alias GroceryListResponse =
-    { groceryList : List Ingredient
+type alias IngredientListResponse =
+    { groceryList : List IngredientListItem
     , mealbook : Mealbook
     }
 
 
+type alias GroceryListResponse =
+    { id : String
+    , name : String
+    , mealIngredients : List Ingredient
+    , generalIngredients : List Ingredient
+    }
+
+
+type alias GroceryListsResponse =
+    { lists : List GroceryList }
+
+
+type alias GeneralItem =
+    { name : String }
+
+
+type GeneralItemForm
+    = NoNewItem
+    | NewGeneralItem GeneralItem
+
+
 type alias Model =
-    { ingredients : List Ingredient
+    { csrfToken : String
+    , currentGroceryList : CurrentGroceryList
+    , ingredients : List IngredientListItem
     , inputStartDate : Maybe Date
     , inputEndDate : Maybe Date
+    , lists : List GroceryList
+    , newGeneralItemForm : GeneralItemForm
     , plannerId : String
     , queryStartDate : Date
     , queryEndDate : Date
@@ -65,23 +109,51 @@ dateInputSettings =
 
 type Message
     = None
-    | LoadedGroceryList (Result Http.Error GroceryListResponse)
+    | AddNewGeneralIngredient
+    | LoadedIngredientsForNewList (Result Http.Error IngredientListResponse)
+    | GroceryListLoaded (Result Http.Error GroceryListResponse)
+    | GroceryListsLoaded (Result Http.Error GroceryListsResponse)
+    | RemoveGroceryListItem String
     | SetStartDate DatePicker.Msg
     | SetEndDate DatePicker.Msg
+    | ToggleIngredientCompletion Ingredient
+    | UpdateNewGenealItem String
 
 
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        LoadedGroceryList (Ok response) ->
+        AddNewGeneralIngredient ->
+            ( { model | newGeneralItemForm = NewGeneralItem { name = "" } }, Cmd.none )
+
+        LoadedIngredientsForNewList (Ok response) ->
             ( { model
                 | ingredients = response.groceryList
               }
             , Cmd.none
             )
 
-        LoadedGroceryList (Err _) ->
+        LoadedIngredientsForNewList (Err _) ->
             ( model, Cmd.none )
+
+        GroceryListLoaded (Ok response) ->
+            ( { model | currentGroceryList = LoadedGroceryList response }, Cmd.none )
+
+        GroceryListLoaded (Err _) ->
+            ( model, Cmd.none )
+
+        GroceryListsLoaded (Ok response) ->
+            ( { model
+                | lists = response.lists
+              }
+            , Cmd.none
+            )
+
+        GroceryListsLoaded (Err _) ->
+            ( model, Cmd.none )
+
+        RemoveGroceryListItem itemId ->
+            ( model, (destroyGroceryListItem model.plannerId model.csrfToken itemId) )
 
         SetEndDate msg ->
             let
@@ -95,7 +167,7 @@ update message model =
                                 Just date ->
                                     ( formDate
                                     , date
-                                    , fetchGroceryList model.plannerId model.queryStartDate date
+                                    , fetchIngredientsForTimeFrame model.plannerId model.queryStartDate date
                                     )
 
                                 Nothing ->
@@ -124,7 +196,7 @@ update message model =
                                 Just date ->
                                     ( formDate
                                     , date
-                                    , fetchGroceryList model.plannerId date model.queryEndDate
+                                    , fetchIngredientsForTimeFrame model.plannerId date model.queryEndDate
                                     )
 
                                 Nothing ->
@@ -141,30 +213,178 @@ update message model =
                 , fetchCommand
                 )
 
+        ToggleIngredientCompletion ingredient ->
+            let
+                updatedIngredient =
+                    { ingredient | isCompleted = not ingredient.isCompleted }
+
+                updatedGroceryList =
+                    (case model.currentGroceryList of
+                        LoadedGroceryList groceryList ->
+                            LoadedGroceryList
+                                { groceryList
+                                    | mealIngredients =
+                                        List.map
+                                            (\i ->
+                                                if i.id == ingredient.id then
+                                                    updatedIngredient
+                                                else
+                                                    i
+                                            )
+                                            groceryList.mealIngredients
+                                }
+
+                        _ ->
+                            model.currentGroceryList
+                    )
+            in
+                ( { model | currentGroceryList = updatedGroceryList }
+                , updateListIngredient updatedIngredient model.csrfToken
+                )
+
+        UpdateNewGenealItem name ->
+            ( { model
+                | newGeneralItemForm = NewGeneralItem { name = name }
+              }
+            , Cmd.none
+            )
+
         None ->
             ( model, Cmd.none )
 
 
 view : Model -> Html Message
 view model =
-    section [ class "bg-white rounded mt2 mx-auto mx-w-48 p1 w100" ]
-        [ Html.header [ class "flex items-center" ]
-            [ DatePicker.view model.inputStartDate
-                dateInputSettings
-                model.startDatePicker
-                |> Html.map SetStartDate
-            , DatePicker.view model.inputEndDate
-                dateInputSettings
-                model.endDatePicker
-                |> Html.map SetEndDate
-            , button [] [ text "Create Grocery List" ]
+    article [ class "clearfix flex w100" ]
+        [ section [ class "bg-white col-6 rounded ml-auto p1" ]
+            (case model.currentGroceryList of
+                NewGroceryList ->
+                    (newGroceryListForm model)
+
+                LoadingGroceryList groceryList ->
+                    [ span [] [ text "Loading..." ] ]
+
+                LoadedGroceryList groceryList ->
+                    (groceryListForm model groceryList)
+            )
+        , section [ class "col-3 pl2" ]
+            [ ul [ class "bg-white rounded m0 p2" ]
+                (List.map (groceryListItem model.plannerId model.currentGroceryList) model.lists)
             ]
-        , ul []
-            (List.map ingredientItem model.ingredients)
         ]
 
 
-ingredientItem : Ingredient -> Html Message
+newGroceryListForm : Model -> List (Html Message)
+newGroceryListForm model =
+    [ Html.header []
+        [ Html.form
+            [ action ("/planners/" ++ model.plannerId ++ "/grocery-lists")
+            , class "flex items-center"
+            , method "post"
+            ]
+            [ DatePicker.view model.inputStartDate
+                ({ dateInputSettings | inputName = Just "start_date" })
+                model.startDatePicker
+                |> Html.map SetStartDate
+            , DatePicker.view model.inputEndDate
+                ({ dateInputSettings | inputName = Just "end_date" })
+                model.endDatePicker
+                |> Html.map SetEndDate
+            , input [ name "authenticity_token", Html.Attributes.type_ "hidden", value model.csrfToken ] []
+            , button [] [ text "Create Grocery List" ]
+            ]
+        ]
+    , ul []
+        (List.map ingredientItem model.ingredients)
+    ]
+
+
+groceryListForm : Model -> GroceryListResponse -> List (Html Message)
+groceryListForm model groceryList =
+    [ h3 [ class "center" ] [ text groceryList.name ]
+    , Keyed.ul [ class "list-reset" ]
+        (List.map groceryListIngredientItem groceryList.mealIngredients)
+    , div [ class "flex items-center" ]
+        [ h4 [ class "pr2" ] [ text "General" ]
+        , a
+            [ class "flex-center box2 circle bg-green c-white normal"
+            , href "#"
+            , onClickPreventDefault AddNewGeneralIngredient
+            ]
+            [ text "+" ]
+        ]
+    , (case model.newGeneralItemForm of
+        NoNewItem ->
+            span [] []
+
+        NewGeneralItem item ->
+            input [ onInput UpdateNewGenealItem, value item.name ] []
+      )
+    ]
+
+
+groceryListIngredientItem : Ingredient -> ( String, Html Message )
+groceryListIngredientItem ingredient =
+    ( ingredient.id
+    , li [ class "flex h5 ht3 items-center" ]
+        [ input
+            [ Html.Attributes.type_ "checkbox"
+            , Html.Attributes.checked ingredient.isCompleted
+            , onCheckBoxClick (ToggleIngredientCompletion ingredient)
+            ]
+            []
+        , span [ class "ml1" ] [ text ingredient.name ]
+        ]
+    )
+
+
+groceryListItem : String -> CurrentGroceryList -> GroceryList -> Html Message
+groceryListItem plannerId currentGroceryList listItem =
+    let
+        currentGroceryListId =
+            case currentGroceryList of
+                LoadedGroceryList groceryList ->
+                    groceryList.id
+
+                _ ->
+                    ""
+
+        url =
+            "/planners/" ++ plannerId ++ "/grocery-lists/" ++ listItem.id
+    in
+        li [ class "bg-grey flex ht3 items-center m0 mb1 p1 w100" ]
+            [ a [ class "h5 text-decoration-none", href url ]
+                [ text listItem.name ]
+            , if currentGroceryListId == listItem.id then
+                span [] []
+              else
+                a [ class "cursor ml-auto", onClick (RemoveGroceryListItem listItem.id) ] [ text "X" ]
+            ]
+
+
+onCheckBoxClick : message -> Attribute message
+onCheckBoxClick message =
+    let
+        config =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        onWithOptions "click" config (Decode.succeed message)
+
+
+onClickPreventDefault : message -> Attribute message
+onClickPreventDefault message =
+    let
+        config =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        onWithOptions "click" config (Decode.succeed message)
+
+
+ingredientItem : IngredientListItem -> Html Message
 ingredientItem ingredient =
     li [] [ text ingredient.name ]
 
@@ -173,39 +393,133 @@ ingredientItem ingredient =
 -- COMMANDS
 
 
-fetchGroceryList : String -> Date -> Date -> Cmd Message
-fetchGroceryList plannerId startDate endDate =
+destroyGroceryListItem : String -> String -> String -> Cmd Message
+destroyGroceryListItem plannerId csrfToken listId =
+    Http.send GroceryListsLoaded
+        (Http.request
+            { method = "DELETE"
+            , headers = [ (Http.header "X-CSRF-Token" csrfToken) ]
+            , url = "/api/planners/" ++ plannerId ++ "/grocery-lists/" ++ listId
+            , body = Http.emptyBody
+            , expect = Http.expectJson groceryListsDecoder
+            , timeout = Nothing
+            , withCredentials = False
+            }
+        )
+
+
+fetchGroceryList : String -> String -> Cmd Message
+fetchGroceryList plannerId listId =
+    let
+        urlString =
+            "/api/planners/" ++ plannerId ++ "/grocery-lists/" ++ listId
+    in
+        Http.send GroceryListLoaded <|
+            Http.get urlString groceryListDecoder
+
+
+fetchIngredientsForTimeFrame : String -> Date -> Date -> Cmd Message
+fetchIngredientsForTimeFrame plannerId startDate endDate =
     let
         urlString =
             "/api/planners/"
                 ++ plannerId
-                ++ "/grocery-list"
+                ++ "/grocery-lists/new"
                 ++ "?start_date="
                 ++ DateFormat.toIsoString startDate
                 ++ "&end_date="
                 ++ DateFormat.toIsoString endDate
     in
-        Http.send LoadedGroceryList <|
-            Http.get urlString groceryListDecoder
+        Http.send LoadedIngredientsForNewList <|
+            Http.get urlString ingredientsListDecoder
+
+
+fetchGroceryLists : String -> Cmd Message
+fetchGroceryLists plannerId =
+    let
+        urlString =
+            "/api/planners/" ++ plannerId ++ "/grocery-lists"
+    in
+        Http.send GroceryListsLoaded <|
+            Http.get urlString groceryListsDecoder
+
+
+updateListIngredient : Ingredient -> String -> Cmd Message
+updateListIngredient ingredient csrfToken =
+    let
+        urlString =
+            "/api/grocery-list-items/" ++ ingredient.id
+    in
+        Http.send GroceryListLoaded <|
+            Http.request
+                { method = "PATCH"
+                , headers = [ (Http.header "X-CSRF-Token" csrfToken) ]
+                , url = urlString
+                , body =
+                    (Http.jsonBody
+                        (Encode.object
+                            [ ( "name", Encode.string ingredient.name )
+                            , ( "is_completed", Encode.bool ingredient.isCompleted )
+                            ]
+                        )
+                    )
+                , expect = Http.expectJson groceryListDecoder
+                , timeout = Nothing
+                , withCredentials = False
+                }
 
 
 
 -- DECODERS
 
 
-groceryListDecoder : Decode.Decoder GroceryListResponse
-groceryListDecoder =
-    Decode.map2 GroceryListResponse
+ingredientsListDecoder : Decode.Decoder IngredientListResponse
+ingredientsListDecoder =
+    Decode.map2 IngredientListResponse
         (Decode.field "grocery_list"
             (Decode.list
-                (Decode.map Ingredient <|
+                (Decode.map IngredientListItem <|
                     Decode.field "name" Decode.string
                 )
             )
         )
-        (Decode.field "mealbook" <|
-            Decode.map GroceryList <|
-                Decode.field "id" Decode.string
+        (Decode.field "mealbook"
+            (Decode.map Mealbook
+                (Decode.field "id" Decode.string)
+            )
+        )
+
+
+groceryListItemDecoder : Decode.Decoder (List Ingredient)
+groceryListItemDecoder =
+    Decode.list
+        (Decode.map3 Ingredient
+            (Decode.field "is_completed" Decode.bool)
+            (Decode.field "id" Decode.string)
+            (Decode.field "edited_name" Decode.string)
+        )
+
+
+groceryListDecoder : Decode.Decoder GroceryListResponse
+groceryListDecoder =
+    (Decode.field "grocery_list"
+        (Decode.map4 GroceryListResponse
+            (Decode.field "id" Decode.string)
+            (Decode.field "name" Decode.string)
+            (Decode.field "grocery_list_items" groceryListItemDecoder)
+            (Decode.field "grocery_list_items_general" groceryListItemDecoder)
+        )
+    )
+
+
+groceryListsDecoder : Decode.Decoder GroceryListsResponse
+groceryListsDecoder =
+    Decode.map GroceryListsResponse
+        (Decode.list
+            (Decode.map2 GroceryList
+                (Decode.field "id" Decode.string)
+                (Decode.field "name" Decode.string)
+            )
         )
 
 
@@ -226,17 +540,38 @@ init flags =
 
         endDate =
             DateFormat.fromIsoString flags.initEndDate |> Maybe.withDefault (Date.fromTime 0)
+
+        currentGroceryList =
+            case flags.listId of
+                Just id ->
+                    LoadingGroceryList (GroceryList id "Hello")
+
+                Nothing ->
+                    NewGroceryList
     in
-        ( { ingredients = []
+        ( { csrfToken = flags.csrfToken
+          , currentGroceryList = currentGroceryList
+          , ingredients = []
           , inputStartDate = Just startDate
           , inputEndDate = Just endDate
+          , lists = []
+          , newGeneralItemForm = NoNewItem
           , plannerId = flags.plannerId
           , queryStartDate = startDate
           , queryEndDate = endDate
           , startDatePicker = DatePicker.initFromDate startDate
           , endDatePicker = DatePicker.initFromDate endDate
           }
-        , fetchGroceryList flags.plannerId startDate endDate
+        , Cmd.batch
+            [ (case flags.listId of
+                Just id ->
+                    fetchGroceryList flags.plannerId id
+
+                Nothing ->
+                    fetchIngredientsForTimeFrame flags.plannerId startDate endDate
+              )
+            , fetchGroceryLists flags.plannerId
+            ]
         )
 
 

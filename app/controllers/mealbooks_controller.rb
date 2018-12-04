@@ -3,7 +3,15 @@ class MealbooksController < ApplicationController
   layout "meal_planner", except: %i(index create)
 
   def index
-    render locals: { mealbooks: current_user_mealbooks }
+    data = { mealbooks: current_user_mealbooks }
+    respond_to do |format|
+      format.html do
+        render locals: data
+      end
+      format.json do
+        render json: data
+      end
+    end
   end
 
   def show
