@@ -1,23 +1,18 @@
-module GroceryList exposing (..)
-
-import Http exposing (..)
-import Html exposing (..)
-import Html.Events exposing (..)
-import Html.Keyed as Keyed
-
+module GroceryList exposing (CurrentGroceryList(..), Flags, GeneralItem, GeneralItemForm(..), GroceryList, GroceryListResponse, GroceryListsResponse, Ingredient, IngredientListItem, IngredientListResponse, Mealbook, Message(..), Model, dateInputSettings, destroyGroceryListItem, fetchGroceryList, fetchGroceryLists, fetchIngredientsForTimeFrame, groceryListDecoder, groceryListForm, groceryListIngredientItem, groceryListItem, groceryListItemDecoder, groceryListsDecoder, ingredientItem, ingredientsListDecoder, init, main, newGroceryListForm, onCheckBoxClick, onClickPreventDefault, subscriptions, update, updateListIngredient, view)
 
 -- import Html.Attributes exposing (..)
-
-import Json.Decode as Decode
-import Json.Encode as Encode
-import Date exposing (Date)
-import Date.Extra as DateFormat
-import DatePicker exposing (defaultSettings, DateEvent(..))
-
-
 -- import Html.Events exposing (..)
 
+import Date exposing (Date)
+import Date.Extra as DateFormat
+import DatePicker exposing (DateEvent(..), defaultSettings)
+import Html exposing (..)
 import Html.Attributes exposing (action, class, classList, href, method, name, placeholder, value)
+import Html.Events exposing (..)
+import Html.Keyed as Keyed
+import Http exposing (..)
+import Json.Decode as Decode
+import Json.Encode as Encode
 
 
 type alias Flags =
@@ -67,7 +62,6 @@ type alias GroceryListResponse =
     { id : String
     , name : String
     , mealIngredients : List Ingredient
-    , generalIngredients : List Ingredient
     }
 
 
@@ -113,11 +107,13 @@ type Message
     | LoadedIngredientsForNewList (Result Http.Error IngredientListResponse)
     | GroceryListLoaded (Result Http.Error GroceryListResponse)
     | GroceryListsLoaded (Result Http.Error GroceryListsResponse)
+    | GroceryListItemCreated (Result Http.Error GroceryListResponse)
     | RemoveGroceryListItem String
     | SetStartDate DatePicker.Msg
     | SetEndDate DatePicker.Msg
     | ToggleIngredientCompletion Ingredient
     | UpdateNewGenealItem String
+    | GeneralItemKeyDown Int
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -134,6 +130,40 @@ update message model =
             )
 
         LoadedIngredientsForNewList (Err _) ->
+            ( model, Cmd.none )
+
+        GeneralItemKeyDown keyCode ->
+            if keyCode == 13 then
+                let
+                    itemName =
+                        case model.newGeneralItemForm of
+                            NoNewItem ->
+                                ""
+
+                            NewGeneralItem item ->
+                                item.name
+
+                    groceryListId =
+                        case model.currentGroceryList of
+                            LoadedGroceryList groceryList ->
+                                groceryList.id
+
+                            _ ->
+                                ""
+                in
+                ( { model | newGeneralItemForm = NoNewItem }, createGroceryListItem model.csrfToken groceryListId itemName )
+
+            else
+                ( model, Cmd.none )
+
+        GroceryListItemCreated (Ok response) ->
+            ( { model | currentGroceryList = LoadedGroceryList response }, Cmd.none )
+
+        GroceryListItemCreated (Err msg) ->
+            let
+                _ =
+                    Debug.log "message" msg
+            in
             ( model, Cmd.none )
 
         GroceryListLoaded (Ok response) ->
@@ -153,7 +183,7 @@ update message model =
             ( model, Cmd.none )
 
         RemoveGroceryListItem itemId ->
-            ( model, (destroyGroceryListItem model.plannerId model.csrfToken itemId) )
+            ( model, destroyGroceryListItem model.plannerId model.csrfToken itemId )
 
         SetEndDate msg ->
             let
@@ -176,13 +206,13 @@ update message model =
                         NoChange ->
                             ( model.inputEndDate, model.queryEndDate, Cmd.none )
             in
-                ( { model
-                    | inputEndDate = newEndDate
-                    , queryEndDate = newQueryEndDate
-                    , endDatePicker = newDatePicker
-                  }
-                , fetchCommand
-                )
+            ( { model
+                | inputEndDate = newEndDate
+                , queryEndDate = newQueryEndDate
+                , endDatePicker = newDatePicker
+              }
+            , fetchCommand
+            )
 
         SetStartDate msg ->
             let
@@ -205,13 +235,13 @@ update message model =
                         NoChange ->
                             ( model.inputStartDate, model.queryStartDate, Cmd.none )
             in
-                ( { model
-                    | inputStartDate = newStartDate
-                    , queryStartDate = newQueryStartDate
-                    , startDatePicker = newDatePicker
-                  }
-                , fetchCommand
-                )
+            ( { model
+                | inputStartDate = newStartDate
+                , queryStartDate = newQueryStartDate
+                , startDatePicker = newDatePicker
+              }
+            , fetchCommand
+            )
 
         ToggleIngredientCompletion ingredient ->
             let
@@ -219,7 +249,7 @@ update message model =
                     { ingredient | isCompleted = not ingredient.isCompleted }
 
                 updatedGroceryList =
-                    (case model.currentGroceryList of
+                    case model.currentGroceryList of
                         LoadedGroceryList groceryList ->
                             LoadedGroceryList
                                 { groceryList
@@ -228,6 +258,7 @@ update message model =
                                             (\i ->
                                                 if i.id == ingredient.id then
                                                     updatedIngredient
+
                                                 else
                                                     i
                                             )
@@ -236,11 +267,10 @@ update message model =
 
                         _ ->
                             model.currentGroceryList
-                    )
             in
-                ( { model | currentGroceryList = updatedGroceryList }
-                , updateListIngredient updatedIngredient model.csrfToken
-                )
+            ( { model | currentGroceryList = updatedGroceryList }
+            , updateListIngredient updatedIngredient model.csrfToken
+            )
 
         UpdateNewGenealItem name ->
             ( { model
@@ -259,13 +289,13 @@ view model =
         [ section [ class "bg-white col-6 rounded ml-auto p1" ]
             (case model.currentGroceryList of
                 NewGroceryList ->
-                    (newGroceryListForm model)
+                    newGroceryListForm model
 
                 LoadingGroceryList groceryList ->
                     [ span [] [ text "Loading..." ] ]
 
                 LoadedGroceryList groceryList ->
-                    (groceryListForm model groceryList)
+                    groceryListForm model groceryList
             )
         , section [ class "col-3 pl2" ]
             [ ul [ class "bg-white rounded m0 p2" ]
@@ -283,11 +313,11 @@ newGroceryListForm model =
             , method "post"
             ]
             [ DatePicker.view model.inputStartDate
-                ({ dateInputSettings | inputName = Just "start_date" })
+                { dateInputSettings | inputName = Just "start_date" }
                 model.startDatePicker
                 |> Html.map SetStartDate
             , DatePicker.view model.inputEndDate
-                ({ dateInputSettings | inputName = Just "end_date" })
+                { dateInputSettings | inputName = Just "end_date" }
                 model.endDatePicker
                 |> Html.map SetEndDate
             , input [ name "authenticity_token", Html.Attributes.type_ "hidden", value model.csrfToken ] []
@@ -311,16 +341,20 @@ groceryListForm model groceryList =
             , href "#"
             , onClickPreventDefault AddNewGeneralIngredient
             ]
-            [ text "+" ]
+            [ span [] [ text "+" ] ]
         ]
-    , (case model.newGeneralItemForm of
+    , case model.newGeneralItemForm of
         NoNewItem ->
             span [] []
 
         NewGeneralItem item ->
-            input [ onInput UpdateNewGenealItem, value item.name ] []
-      )
+            input [ onInput UpdateNewGenealItem, onKeyDown GeneralItemKeyDown, value item.name, class "input mt2" ] []
     ]
+
+
+onKeyDown : (Int -> msg) -> Attribute msg
+onKeyDown tagger =
+    on "keydown" (Decode.map tagger keyCode)
 
 
 groceryListIngredientItem : Ingredient -> ( String, Html Message )
@@ -352,14 +386,15 @@ groceryListItem plannerId currentGroceryList listItem =
         url =
             "/planners/" ++ plannerId ++ "/grocery-lists/" ++ listItem.id
     in
-        li [ class "bg-grey flex ht3 items-center m0 mb1 p1 w100" ]
-            [ a [ class "h5 text-decoration-none", href url ]
-                [ text listItem.name ]
-            , if currentGroceryListId == listItem.id then
-                span [] []
-              else
-                a [ class "cursor ml-auto", onClick (RemoveGroceryListItem listItem.id) ] [ text "X" ]
-            ]
+    li [ class "bg-grey flex ht3 items-center m0 mb1 p1 w100" ]
+        [ a [ class "h5 text-decoration-none", href url ]
+            [ text listItem.name ]
+        , if currentGroceryListId == listItem.id then
+            span [] []
+
+          else
+            a [ class "cursor ml-auto", onClick (RemoveGroceryListItem listItem.id) ] [ text "X" ]
+        ]
 
 
 onCheckBoxClick : message -> Attribute message
@@ -370,7 +405,7 @@ onCheckBoxClick message =
             , preventDefault = True
             }
     in
-        onWithOptions "click" config (Decode.succeed message)
+    onWithOptions "click" config (Decode.succeed message)
 
 
 onClickPreventDefault : message -> Attribute message
@@ -381,7 +416,7 @@ onClickPreventDefault message =
             , preventDefault = True
             }
     in
-        onWithOptions "click" config (Decode.succeed message)
+    onWithOptions "click" config (Decode.succeed message)
 
 
 ingredientItem : IngredientListItem -> Html Message
@@ -398,10 +433,30 @@ destroyGroceryListItem plannerId csrfToken listId =
     Http.send GroceryListsLoaded
         (Http.request
             { method = "DELETE"
-            , headers = [ (Http.header "X-CSRF-Token" csrfToken) ]
+            , headers = [ Http.header "X-CSRF-Token" csrfToken ]
             , url = "/api/planners/" ++ plannerId ++ "/grocery-lists/" ++ listId
             , body = Http.emptyBody
             , expect = Http.expectJson groceryListsDecoder
+            , timeout = Nothing
+            , withCredentials = False
+            }
+        )
+
+
+createGroceryListItem : String -> String -> String -> Cmd Message
+createGroceryListItem csrfToken listId itemName =
+    Http.send GroceryListItemCreated
+        (Http.request
+            { method = "POST"
+            , headers = [ Http.header "X-CSRF-Token" csrfToken ]
+            , url = "/api/grocery-lists/" ++ listId ++ "/grocery-list-items"
+            , body =
+                Http.jsonBody
+                    (Encode.object
+                        [ ( "name", Encode.string itemName )
+                        ]
+                    )
+            , expect = Http.expectJson groceryListDecoder
             , timeout = Nothing
             , withCredentials = False
             }
@@ -414,8 +469,8 @@ fetchGroceryList plannerId listId =
         urlString =
             "/api/planners/" ++ plannerId ++ "/grocery-lists/" ++ listId
     in
-        Http.send GroceryListLoaded <|
-            Http.get urlString groceryListDecoder
+    Http.send GroceryListLoaded <|
+        Http.get urlString groceryListDecoder
 
 
 fetchIngredientsForTimeFrame : String -> Date -> Date -> Cmd Message
@@ -430,8 +485,8 @@ fetchIngredientsForTimeFrame plannerId startDate endDate =
                 ++ "&end_date="
                 ++ DateFormat.toIsoString endDate
     in
-        Http.send LoadedIngredientsForNewList <|
-            Http.get urlString ingredientsListDecoder
+    Http.send LoadedIngredientsForNewList <|
+        Http.get urlString ingredientsListDecoder
 
 
 fetchGroceryLists : String -> Cmd Message
@@ -440,8 +495,8 @@ fetchGroceryLists plannerId =
         urlString =
             "/api/planners/" ++ plannerId ++ "/grocery-lists"
     in
-        Http.send GroceryListsLoaded <|
-            Http.get urlString groceryListsDecoder
+    Http.send GroceryListsLoaded <|
+        Http.get urlString groceryListsDecoder
 
 
 updateListIngredient : Ingredient -> String -> Cmd Message
@@ -450,23 +505,22 @@ updateListIngredient ingredient csrfToken =
         urlString =
             "/api/grocery-list-items/" ++ ingredient.id
     in
-        Http.send GroceryListLoaded <|
-            Http.request
-                { method = "PATCH"
-                , headers = [ (Http.header "X-CSRF-Token" csrfToken) ]
-                , url = urlString
-                , body =
-                    (Http.jsonBody
-                        (Encode.object
-                            [ ( "name", Encode.string ingredient.name )
-                            , ( "is_completed", Encode.bool ingredient.isCompleted )
-                            ]
-                        )
+    Http.send GroceryListLoaded <|
+        Http.request
+            { method = "PATCH"
+            , headers = [ Http.header "X-CSRF-Token" csrfToken ]
+            , url = urlString
+            , body =
+                Http.jsonBody
+                    (Encode.object
+                        [ ( "name", Encode.string ingredient.name )
+                        , ( "is_completed", Encode.bool ingredient.isCompleted )
+                        ]
                     )
-                , expect = Http.expectJson groceryListDecoder
-                , timeout = Nothing
-                , withCredentials = False
-                }
+            , expect = Http.expectJson groceryListDecoder
+            , timeout = Nothing
+            , withCredentials = False
+            }
 
 
 
@@ -502,14 +556,12 @@ groceryListItemDecoder =
 
 groceryListDecoder : Decode.Decoder GroceryListResponse
 groceryListDecoder =
-    (Decode.field "grocery_list"
-        (Decode.map4 GroceryListResponse
+    Decode.field "grocery_list"
+        (Decode.map3 GroceryListResponse
             (Decode.field "id" Decode.string)
             (Decode.field "name" Decode.string)
             (Decode.field "grocery_list_items" groceryListItemDecoder)
-            (Decode.field "grocery_list_items_general" groceryListItemDecoder)
         )
-    )
 
 
 groceryListsDecoder : Decode.Decoder GroceryListsResponse
@@ -549,30 +601,29 @@ init flags =
                 Nothing ->
                     NewGroceryList
     in
-        ( { csrfToken = flags.csrfToken
-          , currentGroceryList = currentGroceryList
-          , ingredients = []
-          , inputStartDate = Just startDate
-          , inputEndDate = Just endDate
-          , lists = []
-          , newGeneralItemForm = NoNewItem
-          , plannerId = flags.plannerId
-          , queryStartDate = startDate
-          , queryEndDate = endDate
-          , startDatePicker = DatePicker.initFromDate startDate
-          , endDatePicker = DatePicker.initFromDate endDate
-          }
-        , Cmd.batch
-            [ (case flags.listId of
-                Just id ->
-                    fetchGroceryList flags.plannerId id
+    ( { csrfToken = flags.csrfToken
+      , currentGroceryList = currentGroceryList
+      , ingredients = []
+      , inputStartDate = Just startDate
+      , inputEndDate = Just endDate
+      , lists = []
+      , newGeneralItemForm = NoNewItem
+      , plannerId = flags.plannerId
+      , queryStartDate = startDate
+      , queryEndDate = endDate
+      , startDatePicker = DatePicker.initFromDate startDate
+      , endDatePicker = DatePicker.initFromDate endDate
+      }
+    , Cmd.batch
+        [ case flags.listId of
+            Just id ->
+                fetchGroceryList flags.plannerId id
 
-                Nothing ->
-                    fetchIngredientsForTimeFrame flags.plannerId startDate endDate
-              )
-            , fetchGroceryLists flags.plannerId
-            ]
-        )
+            Nothing ->
+                fetchIngredientsForTimeFrame flags.plannerId startDate endDate
+        , fetchGroceryLists flags.plannerId
+        ]
+    )
 
 
 main : Program Flags Model Message

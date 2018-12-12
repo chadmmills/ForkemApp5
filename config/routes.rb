@@ -30,10 +30,14 @@ Rails.application.routes.draw do
   scope '/api' do
     defaults format: :json do
       resources :mealbooks, only: :index
-      resources :grocery_list_items, path: "grocery-list-items"
+      resources :grocery_list_items, only: [:update], path: "grocery-list-items"
       resources :meal_assignments, path: "meal-assignments"
       resources :planners do
         resources :grocery_lists, only: [:index, :new, :show, :destroy], path: "grocery-lists"
+      end
+
+      resources :grocery_lists, only: [], path: "grocery-lists" do
+        resources :grocery_list_items, only: [:create], path: "grocery-list-items"
       end
     end
   end

@@ -21,7 +21,6 @@ class GroceryListsController < ApplicationController
             .as_json
             .merge(
               grocery_list_items: GroceryListItemsQuery.new(params[:id]).run,
-              grocery_list_items_general: []
           ),
           mealbook: mealbook
         }
