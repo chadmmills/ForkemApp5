@@ -9,7 +9,7 @@ class GroceryListItemsQuery
       .where(grocery_list_id: list_id)
       .order(:id)
   end
-  
+
   private
 
   attr_reader :list_id

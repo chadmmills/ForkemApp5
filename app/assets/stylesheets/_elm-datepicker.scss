@@ -1,3 +1,6 @@
+$datepicker-arrow: #AAA;
+$datepicker-arrow-hover: #BBB;
+
 .elm-datepicker {
   &--container {
     position: relative;
@@ -8,6 +11,32 @@
       background-color: $gray;
       border-radius: .25rem;
       cursor: pointer;
+    }
+  }
+
+  &--prev,
+  &--next {
+    border: 6px solid transparent;
+    display: block;
+    height: 0;
+    outline: none;
+    padding: 0 0.2em;
+    width: 0;
+  }
+
+  &--prev {
+    border-right-color: $datepicker-arrow;
+
+    &:hover {
+      border-right-color: $datepicker-arrow-hover;
+    }
+  }
+
+  &--next {
+    border-left-color: $datepicker-arrow;
+
+    &:hover {
+      border-left-color: $datepicker-arrow-hover;
     }
   }
 
@@ -38,11 +67,20 @@
       border-left: 1px solid rgba(0, 0, 0, .1);
     }
 
+    &-header {
+      align-items: center;
+      display: flex;
+    }
+
 
     td {
       padding: .25rem;
       text-align: center;
     }
+  }
+
+  &--month-container {
+    margin: auto;
   }
 
   &--picked {
