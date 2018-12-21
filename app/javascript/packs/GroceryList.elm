@@ -1,4 +1,4 @@
-module GroceryList exposing (CurrentGroceryList(..), Flags, GeneralItem, GeneralItemForm(..), GroceryList, GroceryListResponse, GroceryListsResponse, Ingredient, IngredientListItem, IngredientListResponse, Mealbook, Message(..), Model, dateInputSettings, destroyGroceryListItem, fetchGroceryList, fetchGroceryLists, fetchIngredientsForTimeFrame, groceryListDecoder, groceryListForm, groceryListIngredientItem, groceryListItem, groceryListItemDecoder, groceryListsDecoder, ingredientItem, ingredientsListDecoder, init, main, newGroceryListForm, onCheckBoxClick, onClickPreventDefault, subscriptions, update, updateListIngredient, view)
+module GroceryList exposing (CurrentGroceryList(..), Flags, GeneralItem, GeneralItemForm(..), GroceryList, GroceryListItem, GroceryListResponse, GroceryListsResponse, IngredientListItem, IngredientListResponse, Mealbook, Message(..), Model, createGroceryListItem, dateInputSettings, destroyGroceryListItem, fetchGroceryList, fetchGroceryLists, fetchIngredientsForTimeFrame, groceryListDecoder, groceryListForm, groceryListIngredientItem, groceryListItem, groceryListItemDecoder, groceryListsDecoder, ingredientItem, ingredientsListDecoder, init, main, newGroceryListForm, onCheckBoxClick, onClickPreventDefault, onKeyDown, subscriptions, update, updateListIngredient, view)
 
 -- import Html.Attributes exposing (..)
 -- import Html.Events exposing (..)
@@ -24,15 +24,23 @@ type alias Flags =
     }
 
 
-type alias Ingredient =
+type GroceryListItemQuantity
+    = NoQuantity
+    | Quantity String
+
+
+type alias GroceryListItem =
     { isCompleted : Bool
     , id : String
     , name : String
+    , quantity : GroceryListItemQuantity
     }
 
 
 type alias IngredientListItem =
     { name : String
+    , measurement : String
+    , quantity : String
     }
 
 
@@ -61,7 +69,7 @@ type alias IngredientListResponse =
 type alias GroceryListResponse =
     { id : String
     , name : String
-    , mealIngredients : List Ingredient
+    , mealIngredients : List GroceryListItem
     }
 
 
@@ -111,7 +119,7 @@ type Message
     | RemoveGroceryListItem String
     | SetStartDate DatePicker.Msg
     | SetEndDate DatePicker.Msg
-    | ToggleIngredientCompletion Ingredient
+    | ToggleIngredientCompletion GroceryListItem
     | UpdateNewGenealItem String
     | GeneralItemKeyDown Int
 
@@ -357,7 +365,7 @@ onKeyDown tagger =
     on "keydown" (Decode.map tagger keyCode)
 
 
-groceryListIngredientItem : Ingredient -> ( String, Html Message )
+groceryListIngredientItem : GroceryListItem -> ( String, Html Message )
 groceryListIngredientItem ingredient =
     ( ingredient.id
     , li [ class "flex h5 ht3 items-center" ]
@@ -367,7 +375,15 @@ groceryListIngredientItem ingredient =
             , onCheckBoxClick (ToggleIngredientCompletion ingredient)
             ]
             []
-        , span [ class "ml1" ] [ text ingredient.name ]
+        , span [ class "ml1" ]
+            [ case ingredient.quantity of
+                NoQuantity ->
+                    span [] []
+
+                Quantity value ->
+                    span [] [ text (value ++ " - ") ]
+            , text ingredient.name
+            ]
         ]
     )
 
@@ -421,7 +437,7 @@ onClickPreventDefault message =
 
 ingredientItem : IngredientListItem -> Html Message
 ingredientItem ingredient =
-    li [] [ text ingredient.name ]
+    li [] [ text (ingredient.quantity ++ " - " ++ ingredient.measurement ++ " - " ++ ingredient.name) ]
 
 
 
@@ -499,7 +515,7 @@ fetchGroceryLists plannerId =
         Http.get urlString groceryListsDecoder
 
 
-updateListIngredient : Ingredient -> String -> Cmd Message
+updateListIngredient : GroceryListItem -> String -> Cmd Message
 updateListIngredient ingredient csrfToken =
     let
         urlString =
@@ -532,8 +548,10 @@ ingredientsListDecoder =
     Decode.map2 IngredientListResponse
         (Decode.field "grocery_list"
             (Decode.list
-                (Decode.map IngredientListItem <|
-                    Decode.field "name" Decode.string
+                (Decode.map3 IngredientListItem
+                    (Decode.field "name" Decode.string)
+                    (Decode.field "measurement_unit" Decode.string)
+                    (Decode.field "total_quantity" Decode.string)
                 )
             )
         )
@@ -544,13 +562,35 @@ ingredientsListDecoder =
         )
 
 
-groceryListItemDecoder : Decode.Decoder (List Ingredient)
+groceryListItemDecoder : Decode.Decoder (List GroceryListItem)
 groceryListItemDecoder =
     Decode.list
-        (Decode.map3 Ingredient
+        (Decode.map4 GroceryListItem
             (Decode.field "is_completed" Decode.bool)
             (Decode.field "id" Decode.string)
             (Decode.field "edited_name" Decode.string)
+            (Decode.map
+                (\value ->
+                    case value of
+                        Nothing ->
+                            NoQuantity
+
+                        Just quantity ->
+                            quantity
+                )
+                (Decode.maybe
+                    (Decode.field "quantity" Decode.string
+                        |> Decode.andThen
+                            (\value ->
+                                if String.isEmpty value then
+                                    Decode.succeed NoQuantity
+
+                                else
+                                    Decode.succeed (Quantity value)
+                            )
+                    )
+                )
+            )
         )
 
 
